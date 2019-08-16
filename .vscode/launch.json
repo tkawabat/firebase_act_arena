@@ -1,0 +1,28 @@
+{
+    // IntelliSense を使用して利用可能な属性を学べます。
+    // 既存の属性の説明をホバーして表示します。
+    // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "scenario",
+			"type": "node",
+            "request": "launch",
+			"args": [
+                "${workspaceRoot}/functions/cli/index.ts",
+                "scenario",
+                "-f",
+                "${workspaceRoot}/functions/work/scenario.tsv"
+            ],
+			"runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+			"cwd": "${workspaceRoot}/functions",
+            "protocol": "inspector",
+            "sourceMaps": true,
+			"internalConsoleOptions": "openOnSessionStart",
+			"env": {
+                "TS_NODE_IGNORE": "false",
+                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-aa1822b9a3e9.json"
+			}
+        }
+    ]
+}
