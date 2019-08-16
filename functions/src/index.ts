@@ -12,7 +12,7 @@ import * as functions from 'firebase-functions';
 
 admin.initializeApp(functions.config().firebase);
 
-export const createAccountDoc = functions.auth.user().onCreate( async (user) => {
+export const createAccountDoc = functions.region('asia-northeast1').auth.user().onCreate( async (user) => {
   const db = admin.firestore();
   const batch = db.batch();
 

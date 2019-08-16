@@ -9,7 +9,7 @@
 			"type": "node",
             "request": "launch",
 			"args": [
-                "${workspaceRoot}/functions/cli/index.ts",
+                "${workspaceRoot}/functions/src/cli.ts",
                 "scenario",
                 "-f",
                 "${workspaceRoot}/functions/work/scenario.tsv"

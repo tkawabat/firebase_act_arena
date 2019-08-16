@@ -1,5 +1,4 @@
 import * as admin from 'firebase-admin';
-import * as faker from 'faker';
 import * as fs from 'fs-extra';
 import { DocumentData } from '@google-cloud/firestore';
 
@@ -11,7 +10,7 @@ class ActScenario {
 
     constructor() {
         this.db = admin.firestore();
-        this.ref = this.db.collection('ActScenario');
+        this.ref = this.db.collection('ArenaScenario');
     }
 
     private parseLine = (line: String): DocumentData => {
@@ -48,6 +47,11 @@ class ActScenario {
         }
     }
 
+    private commit = async (batch:FirebaseFirestore.WriteBatch) => {
+        const results = await batch.commit();
+        console.log(results);
+    }
+
     // 作成用関数
     public importTsv = async (path: string) => {
 
@@ -67,14 +71,12 @@ class ActScenario {
             batch.create(this.ref.doc(), scenario);
             i++;
             if (i >= this.batchSize) {
-                const results = await batch.commit();
-                console.log(results);
+                await this.commit(batch);
                 i = 0;
                 batch = this.db.batch();
             }
         }
-        const results = await batch.commit();
-        console.log(results);
+        await this.commit(batch);
     }
 
     // 削除用関数

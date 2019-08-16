@@ -5,8 +5,8 @@ import * as program from 'commander'
 admin.initializeApp()
 admin.firestore().settings({ timestampsInSnapshots: true })
 
-import { createUsers, deleteUsers } from './user';
-import ActScenario from './ActScenario';
+import { createUsers, deleteUsers } from '../model/user';
+import ArenaScenario from '../model/ArenaScenario';
 
 program.version('1.0.0', '-v, --version');
 program
@@ -27,7 +27,7 @@ program
     .option('-d, --delete', 'delete only the created documents')
     .option('-f, --file <file>', 'import tsv file')
     .action(cmd => {
-        const promise = cmd.delete ? ActScenario.delete() : ActScenario.importTsv(cmd.file);
+        const promise = cmd.delete ? ArenaScenario.delete() : ArenaScenario.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program.parse(process.argv);
