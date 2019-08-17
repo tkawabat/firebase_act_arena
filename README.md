@@ -1,4 +1,12 @@
-## 実行方法
+## functions
+* deploy
+
+```
+$ firebase use [develop/production]
+$ firebase deploy
+```
+
+## cli実行方法
 
 * アリーナ作成
 
