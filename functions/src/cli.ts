@@ -6,7 +6,9 @@ admin.initializeApp()
 admin.firestore().settings({ timestampsInSnapshots: true })
 
 import { createUsers, deleteUsers } from '../model/user';
-import ArenaScenario from '../model/ArenaScenario';
+import ArenaModel from '../model/ArenaModel';
+import ArenaScenarioModel from '../model/ArenaScenarioModel';
+import { symlinkSync } from 'fs';
 
 program.version('1.0.0', '-v, --version');
 program
@@ -17,17 +19,29 @@ program
     .action(cmd => {
         if (cmd.number > 10000) {
             console.error('The number must be 10000 or less');
-            return;
+            process.exit(-1);
         }
         const promise = cmd.delete ? deleteUsers() : createUsers(cmd.number)
         promise.then(() => console.log('Command has completed')).catch(console.error)
     });
 program
+    .command('arena')
+    .option('-d, --delete', 'delete all ')
+    .option('-n, --number <n>', 'A number of test documents', parseInt, 0)
+    .action(cmd => {
+        if (cmd.number > 100) {
+            console.error('The number must be 100 or less');
+            process.exit(-1);
+        }
+        const promise = cmd.delete ? ArenaModel.delete() : ArenaModel.create(cmd.number);
+        promise.then(() => console.log('Command has completed')).catch(console.error);
+    });
+program
     .command('scenario')
-    .option('-d, --delete', 'delete only the created documents')
+    .option('-d, --delete', 'delete al')
     .option('-f, --file <file>', 'import tsv file')
     .action(cmd => {
-        const promise = cmd.delete ? ArenaScenario.delete() : ArenaScenario.importTsv(cmd.file);
+        const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program.parse(process.argv);

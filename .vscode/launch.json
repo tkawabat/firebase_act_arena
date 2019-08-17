@@ -21,7 +21,7 @@
 			"internalConsoleOptions": "openOnSessionStart",
 			"env": {
                 "TS_NODE_IGNORE": "false",
-                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-aa1822b9a3e9.json"
+                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-dev-612725bcba19.json"
 			}
         }
     ]

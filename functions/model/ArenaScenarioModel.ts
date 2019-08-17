@@ -2,18 +2,30 @@ import * as admin from 'firebase-admin';
 import * as fs from 'fs-extra';
 import { DocumentData } from '@google-cloud/firestore';
 
+import ModelBase from './ModelBase';
 
-class ActScenario {
-    private db:FirebaseFirestore.Firestore;
-    private batchSize = 500;
-    private ref:FirebaseFirestore.CollectionReference;
+interface Charactors extends DocumentData {
+    name: string
+    gender: number
+}
+interface ArenaScenario extends DocumentData {
+    title: string
+    url: string
+    agreement_url: string
+    agreement_scroll: number
+    charactors: Array<Charactors>
+    start: string
+    end: string
+    createdAt: admin.firestore.FieldValue
+    updatedAt: admin.firestore.FieldValue
+}
 
+class ArenaScenarioModel extends ModelBase {
     constructor() {
-        this.db = admin.firestore();
-        this.ref = this.db.collection('ArenaScenario');
+        super('ArenaScenario');
     }
 
-    private parseLine = (line: String): DocumentData => {
+    private parseLine = (line: String): ArenaScenario => {
         const l = line.split('\t');
         const charactors = [];
         for (const c of l[4].split(',')) {
@@ -47,11 +59,6 @@ class ActScenario {
         }
     }
 
-    private commit = async (batch:FirebaseFirestore.WriteBatch) => {
-        const results = await batch.commit();
-        console.log(results);
-    }
-
     // 作成用関数
     public importTsv = async (path: string) => {
 
@@ -78,29 +85,6 @@ class ActScenario {
         }
         await this.commit(batch);
     }
-
-    // 削除用関数
-    public delete = async () => {
-        // モックデータのみを500件ずつ取得
-        const query = await this.ref
-            .limit(this.batchSize)
-            ;
-
-        // 再帰関数
-        const executeBatch = async () => {
-            const snapshot = await query.get();
-            if (snapshot.size === 0) {
-                return;
-            }
-            const batch = this.db.batch();
-            snapshot.docs.forEach(doc => {
-                batch.delete(doc.ref)
-            })
-            await batch.commit();
-            await executeBatch();
-        }
-        await executeBatch();
-    }
 }
 
-export default new ActScenario();
+export default new ArenaScenarioModel();

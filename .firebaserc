@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "act-arena"
+    "production": "act-arena",
+    "develop": "act-arena-dev"
   }
 }
