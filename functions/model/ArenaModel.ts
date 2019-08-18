@@ -19,8 +19,7 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
-    // 作成用関数
-    public create = async (n: number) => {
+    public createBatch = async (n: number) => {
         const batch = this.db.batch();
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
