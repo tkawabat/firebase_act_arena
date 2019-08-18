@@ -1,6 +1,6 @@
 {
   "projects": {
     "production": "act-arena",
-    "develop": "act-arena-dev"
+    "develop": "act-arena-dev-27e15"
   }
 }

@@ -5,7 +5,7 @@ import ModelBase from './ModelBase';
 
 
 interface Arena extends DocumentData {
-    number: number
+    id: number
     users: Array<string>
     state: number
     time: number
@@ -24,7 +24,7 @@ class ArenaModel extends ModelBase {
         const batch = this.db.batch();
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
-                number: i
+                id: i
                 , users: []
                 , state: 0
                 , time: -1
