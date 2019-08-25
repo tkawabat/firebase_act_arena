@@ -4,10 +4,10 @@ import * as functions from 'firebase-functions';
 admin.initializeApp(functions.config().firebase);
 
 export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
-    const db = admin.firestore();
-    const batch = db.batch();
+    const firestore = admin.firestore();
+    const batch = firestore.batch();
 
-    const userCollection = db.collection('User');
+    const userCollection = firestore.collection('User');
     const userRef = userCollection.doc(user.uid);
 
     try {
@@ -24,3 +24,28 @@ export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
         console.log(`error occurs: ${e}`);
     }
 });
+
+export const connectionChnaged = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
+    console.log(change.after.val());
+    if (change.after.val().state !== 0) {
+        return;
+    }
+    const uid = change.after.key;
+    console.log('uid: '+uid);
+    
+    const firestore = admin.firestore();
+    const arena:string = await firestore.collection('User').doc(uid).get().then((snapshot) => {
+        const data = snapshot.data();
+        if (!data) return '';
+        return data.arena as string;
+    });
+    if (arena === '') {
+        console.log('no data');
+        return;
+    }
+
+    firestore.collection('Arena').doc(arena).collection('RoomUser').doc(uid).delete()
+    .then(() => console.log('ok'))
+    .catch(() => console.log('user delete error'))
+    ;
+})

@@ -6,7 +6,6 @@ import ModelBase from './ModelBase';
 
 interface Arena extends DocumentData {
     id: number
-    users: Array<string>
     state: number
     time: number
     scenario: string
@@ -24,7 +23,6 @@ class ArenaModel extends ModelBase {
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
                 id: i
-                , users: []
                 , state: 0
                 , time: -1
                 , scenario: ''
