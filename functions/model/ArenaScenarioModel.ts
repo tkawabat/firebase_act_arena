@@ -71,7 +71,7 @@ class ArenaScenarioModel extends ModelBase {
         }
         lines.shift();
 
-        let batch = this.db.batch();
+        let batch = this.firestore.batch();
         let i = 0;
         for (const line of lines) {
             const scenario = this.parseLine(line);
@@ -80,7 +80,7 @@ class ArenaScenarioModel extends ModelBase {
             if (i >= this.batchSize) {
                 await this.commit(batch);
                 i = 0;
-                batch = this.db.batch();
+                batch = this.firestore.batch();
             }
         }
         await this.commit(batch);

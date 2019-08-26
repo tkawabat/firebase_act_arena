@@ -2,13 +2,13 @@ import * as admin from 'firebase-admin';
 
 
 export default class ModelBase {
-    protected db:FirebaseFirestore.Firestore;
+    protected firestore:FirebaseFirestore.Firestore;
     protected batchSize = 500;
     protected ref:FirebaseFirestore.CollectionReference;
 
     constructor(collection:string) {
-        this.db = admin.firestore();
-        this.ref = this.db.collection(collection);
+        this.firestore = admin.firestore();
+        this.ref = this.firestore.collection(collection);
     }
 
     protected commit = async (batch:FirebaseFirestore.WriteBatch) => {
@@ -29,7 +29,7 @@ export default class ModelBase {
             if (snapshot.size === 0) {
                 return;
             }
-            const batch = this.db.batch();
+            const batch = this.firestore.batch();
             snapshot.docs.forEach(doc => {
                 batch.delete(doc.ref)
             })

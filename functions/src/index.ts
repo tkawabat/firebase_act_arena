@@ -3,6 +3,8 @@ import * as functions from 'firebase-functions';
 
 admin.initializeApp(functions.config().firebase);
 
+import ArenaModel from '../model/ArenaModel';
+
 export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
     const batch = firestore.batch();
@@ -25,14 +27,13 @@ export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
     }
 });
 
-export const connectionChnaged = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
-    console.log(change.after.val());
+export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
     if (change.after.val().state !== 0) {
         return;
     }
     const uid = change.after.key;
     console.log('uid: '+uid);
-    
+
     const firestore = admin.firestore();
     const arena:string = await firestore.collection('User').doc(uid).get().then((snapshot) => {
         const data = snapshot.data();
@@ -48,4 +49,12 @@ export const connectionChnaged = functions.database.ref('status/{uid}').onUpdate
     .then(() => console.log('ok'))
     .catch(() => console.log('user delete error'))
     ;
-})
+});
+
+export const arenaUpdated = functions.firestore.document('Arena/{areanaId}/RoomUser/{uid}').onUpdate(async (
+    change: functions.Change<functions.firestore.DocumentSnapshot>
+    , context: functions.EventContext
+) => {
+    console.log('ArenaId: ' + context.params.areanaId);
+    await ArenaModel.arenaUpdated(context.params.areanaId);
+});
