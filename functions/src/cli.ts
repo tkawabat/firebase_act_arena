@@ -37,7 +37,7 @@ program
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program
-    .command('scenario')
+    .command('arenaScenario')
     .option('-d, --delete', 'delete al')
     .option('-f, --file <file>', 'import tsv file')
     .action(cmd => {

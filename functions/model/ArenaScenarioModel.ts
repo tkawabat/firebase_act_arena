@@ -14,6 +14,9 @@ interface ArenaScenario extends DocumentData {
     agreement_url: string
     agreement_scroll: number
     charactors: Array<Charactors>
+    male: number
+    female: number
+    unknown: number
     start: string
     end: string
     createdAt: admin.firestore.FieldValue
@@ -28,14 +31,21 @@ class ArenaScenarioModel extends ModelBase {
     private parseLine = (line: String): ArenaScenario => {
         const l = line.split('\t');
         const charactors = [];
+
+        let male: number = 0;
+        let female: number = 0;
+        let unknown: number = 0;
         for (const c of l[4].split(',')) {
             let gender: number = 0;
             if (c.indexOf('♂') !== -1) {
                 gender = 1;
+                male++;
             } else if (c.indexOf('♀') !== -1) {
                 gender = 2;
+                female++;
             } else if (c.indexOf('?') !== -1) {
                 gender = 0;
+                unknown++;
             } else {
                 console.error('unknown gender');
                 console.error(l);
@@ -52,6 +62,9 @@ class ArenaScenarioModel extends ModelBase {
             , agreement_url: l[2]
             , agreement_scroll: parseInt(l[3])
             , charactors: charactors
+            , male: male
+            , female: female
+            , unknown: unknown
             , start: l[5]
             , end: l[6]
             , createdAt: admin.firestore.FieldValue.serverTimestamp()
