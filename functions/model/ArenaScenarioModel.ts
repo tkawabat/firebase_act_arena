@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import * as fs from 'fs-extra';
 import { DocumentData } from '@google-cloud/firestore';
 
+import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
 
 interface Charactors extends DocumentData {
@@ -13,10 +14,8 @@ interface ArenaScenario extends DocumentData {
     url: string
     agreement_url: string
     agreement_scroll: number
-    charactors: Array<Charactors>
-    male: number
-    female: number
-    unknown: number
+    characters: Array<Charactors>
+    gender_rate: Array<string>
     start: string
     end: string
     createdAt: admin.firestore.FieldValue
@@ -30,7 +29,7 @@ class ArenaScenarioModel extends ModelBase {
 
     private parseLine = (line: String): ArenaScenario => {
         const l = line.split('\t');
-        const charactors = [];
+        const characters = [];
 
         let male: number = 0;
         let female: number = 0;
@@ -51,20 +50,23 @@ class ArenaScenarioModel extends ModelBase {
                 console.error(l);
                 process.exit(-1);
             }
-            charactors.push({
+            characters.push({
                 name: c.replace(/[?♂♀]/, '')
                 , gender: gender
             });
+        }
+
+        const genderRate = [];
+        for (let i = 0; i <= unknown; i++) {
+            genderRate.push((male+unknown-i)+':'+(female+i));
         }
         return {
             title: l[0]
             , url: l[1]
             , agreement_url: l[2]
             , agreement_scroll: parseInt(l[3])
-            , charactors: charactors
-            , male: male
-            , female: female
-            , unknown: unknown
+            , characters: characters
+            , gender_rate: genderRate
             , start: l[5]
             , end: l[6]
             , createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -97,6 +99,17 @@ class ArenaScenarioModel extends ModelBase {
             }
         }
         await this.commit(batch);
+    }
+
+    public getRandom = async (male: number, female: number): Promise<ArenaScenario> => {
+        return this.firestore.collection('ArenaScenario')
+            .where('gender_rate', 'array-contains', male+':'+female)
+            .limit(1000)
+            .get().then((snapshot) => {
+                const scenarios = snapshot.docs.map(v => v.data());
+                return ArrayUtil.shuffle(scenarios)[0];
+            })
+            ;
     }
 }
 

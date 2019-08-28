@@ -51,10 +51,10 @@ export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate
     ;
 });
 
-export const arenaUpdated = functions.firestore.document('Arena/{areanaId}/RoomUser/{uid}').onUpdate(async (
+export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/RoomUser/{uid}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>
     , context: functions.EventContext
 ) => {
-    console.log('ArenaId: ' + context.params.areanaId);
-    await ArenaModel.arenaUpdated(context.params.areanaId);
+    console.log('ArenaId: ' + context.params.arenaId);
+    await ArenaModel.roomUserUpdated(context.params.arenaId);
 });

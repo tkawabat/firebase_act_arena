@@ -8,7 +8,6 @@ admin.firestore().settings({ timestampsInSnapshots: true })
 //import UserModel from '../model/UserModel';
 import ArenaModel from '../model/ArenaModel';
 import ArenaScenarioModel from '../model/ArenaScenarioModel';
-import { symlinkSync } from 'fs';
 
 program.version('1.0.0', '-v, --version');
 // program
@@ -44,6 +43,10 @@ program
         const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
+program
+    .action(async cmd => {
+        console.log(await ArenaScenarioModel.getRandom(1,1));
+    })
 program.parse(process.argv);
 
 console.log('Firestore Mocking CLI');

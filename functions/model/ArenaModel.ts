@@ -2,14 +2,26 @@ import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
 import * as C from '../lib/Const';
+import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
+import ArenaScenarioModel from './ArenaScenarioModel';
 
-
+interface Charactors {
+    name: string
+    gender: number
+    user: string
+}
 interface Arena extends DocumentData {
     id: number
     state: C.ArenaState
     time: number
-    scenario: string
+    title: string
+    url: string
+    agreement_url: string
+    agreement_scroll: number
+    characters: Array<Charactors>
+    start: string
+    end: string
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
 }
@@ -19,15 +31,74 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
-    private shuffle = (list:Array<any>) => {
-        const copied = list.slice();
-        for (let i = copied.length - 1; i > 0; i--){
-            const r = Math.floor(Math.random() * (i + 1));
-            const tmp = copied[i];
-            copied[i] = copied[r];
-            copied[r] = tmp;
+    private decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
+        // 演者決め
+        let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
+            return snapshot.docs.map((value) => {
+                const data = value.data();
+                data.id = value.id;
+                return data;
+            })
+        });
+        if (users.length < 2) {
+            console.log('users < 2');
+            return;
         }
-        return copied;
+        users = ArrayUtil.shuffle(users).slice(0,2);
+        console.log('users: '+users.map((user) => user.name));
+        
+        // 台本決め
+        let male = 0;
+        let female = 0;
+        for (const u of users) {
+            if (u.gender === C.Gender.Male) male++;
+            else if (u.gender === C.Gender.Female) female++;
+        }
+        const scenario = await ArenaScenarioModel.getRandom(male, female);
+        
+
+        // 役決め
+        // 不問以外を先に決める
+        for (const [i, user] of users.entries()) {
+            for (const [j, character] of scenario.characters.entries()) {
+                if (character.gender === C.Gender.Unknown) continue;
+                if (character.gender !== user.gender) continue;
+                users[i].character = character;
+                scenario.characters[j].user = user.id;
+                break;
+            }
+        }
+        // 不問を決める
+        for (const [i, user] of users.entries()) {
+            for (const [j, character] of scenario.characters.entries()) {
+                if (character.gender !== C.Gender.Unknown) continue;
+                if (user.character) continue;
+                users[i].character = character;
+                scenario.characters[j].user = user.id;
+                break;
+            }
+        }
+        console.log(scenario);
+
+        const p = [];
+        users.forEach((user) => {
+            p.push(arenaSnapshot.ref.collection('RoomUser').doc(user.id).update({
+                state: C.ArenaUserState.ACTOR
+            }));
+        })
+        p.push(arenaSnapshot.ref.update({
+            state: C.ArenaState.READY
+            , time: 60
+            , title: scenario.title
+            , url: scenario.url
+            , agreement_url: scenario.agreement_url
+            , agreement_scroll: scenario.agreement_scroll
+            , characters: scenario.characters
+            , start: scenario.start
+            , end: scenario.end
+        }));
+
+        await Promise.all(p);
     }
 
     public createBatch = async (n: number) => {
@@ -37,7 +108,13 @@ class ArenaModel extends ModelBase {
                 id: i
                 , state: C.ArenaState.WAIT
                 , time: -1
-                , scenario: ''
+                , title: ''
+                , url: ''
+                , agreement_url: ''
+                , agreement_scroll: -1
+                , characters: []
+                , start: ''
+                , end: ''
                 , createdAt: admin.firestore.FieldValue.serverTimestamp()
                 , updatedAt: admin.firestore.FieldValue.serverTimestamp()
             };
@@ -46,37 +123,18 @@ class ArenaModel extends ModelBase {
         await this.commit(batch);
     }
 
-    public arenaUpdated = async (areanaId:string) => {
-        const arenaSnapshot = await this.firestore.collection('Arena').doc(areanaId).get();
+    public roomUserUpdated = async (arenaId:string) => {
+        const arenaSnapshot = await this.firestore.collection('Arena').doc(arenaId).get();
         const arena = arenaSnapshot.data() as Arena;
 
-        if (!arena) return;
-        if (arena.state !== 0) return;
-
-        let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
-            return snapshot.docs.map((value) => {
-                const data = value.data();
-                data.id = value.id;
-                return data;
-            })
-        });
-
-        if (users.length < 2) return;
-
-        users = this.shuffle(users).slice(0,2);
-        const p = [];
-        p.push(arenaSnapshot.ref.collection('RoomUser').doc(users[0].id).update({
-            state: C.ArenaUserState.ACTOR
-        }));
-        p.push(arenaSnapshot.ref.collection('RoomUser').doc(users[1].id).update({
-            state: C.ArenaUserState.ACTOR
-        }));
-        p.push(arenaSnapshot.ref.update({
-            state: C.ArenaState.READY
-            , time: 60
-        }));
-
-        await Promise.all(p);
+        if (!arena) {
+            console.error('arena not found');
+            return;
+        }
+        if (arena.state === 0) {
+            console.log('state is WAIT');
+            await this.decideProgram(arenaSnapshot);
+        }
     }
 }
 
