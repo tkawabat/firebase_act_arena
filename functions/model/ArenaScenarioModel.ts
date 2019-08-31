@@ -11,11 +11,11 @@ interface Charactors extends DocumentData {
 }
 interface ArenaScenario extends DocumentData {
     title: string
-    url: string
-    agreement_url: string
-    agreement_scroll: number
+    scenarioUrl: string
+    agreementUrl: string
+    agreementScroll: number
     characters: Array<Charactors>
-    gender_rate: Array<string>
+    genderRate: Array<string>
     start: string
     end: string
     createdAt: admin.firestore.FieldValue
@@ -62,11 +62,11 @@ class ArenaScenarioModel extends ModelBase {
         }
         return {
             title: l[0]
-            , url: l[1]
-            , agreement_url: l[2]
-            , agreement_scroll: parseInt(l[3])
+            , scenarioUrl: l[1]
+            , agreementUrl: l[2]
+            , agreementScroll: parseInt(l[3])
             , characters: characters
-            , gender_rate: genderRate
+            , genderRate: genderRate
             , start: l[5]
             , end: l[6]
             , createdAt: admin.firestore.FieldValue.serverTimestamp()
@@ -103,7 +103,7 @@ class ArenaScenarioModel extends ModelBase {
 
     public getRandom = async (male: number, female: number): Promise<ArenaScenario> => {
         return this.firestore.collection('ArenaScenario')
-            .where('gender_rate', 'array-contains', male+':'+female)
+            .where('genderRate', 'array-contains', male+':'+female)
             .limit(1000)
             .get().then((snapshot) => {
                 const scenarios = snapshot.docs.map(v => v.data());

@@ -14,11 +14,11 @@ interface Charactors {
 interface Arena extends DocumentData {
     id: number
     state: C.ArenaState
-    time: number
+    startAt: FirebaseFirestore.FieldValue
     title: string
-    url: string
-    agreement_url: string
-    agreement_scroll: number
+    scenarioUrl: string
+    agreementUrl: string
+    agreementScroll: number
     characters: Array<Charactors>
     start: string
     end: string
@@ -55,7 +55,10 @@ class ArenaModel extends ModelBase {
             else if (u.gender === C.Gender.Female) female++;
         }
         const scenario = await ArenaScenarioModel.getRandom(male, female);
-        
+        if (!scenario) {
+            console.error('scenario not found');
+            return;
+        }
 
         // 役決め
         // 不問以外を先に決める
@@ -88,14 +91,15 @@ class ArenaModel extends ModelBase {
         })
         p.push(arenaSnapshot.ref.update({
             state: C.ArenaState.READY
-            , time: 60
+            , startAt: admin.firestore.FieldValue.serverTimestamp()
             , title: scenario.title
-            , url: scenario.url
-            , agreement_url: scenario.agreement_url
-            , agreement_scroll: scenario.agreement_scroll
+            , scenarioUrl: scenario.scenarioUrl
+            , agreementUrl: scenario.agreementUrl
+            , agreementScroll: scenario.agreementScroll
             , characters: scenario.characters
             , start: scenario.start
             , end: scenario.end
+            , updateAt: admin.firestore.FieldValue.serverTimestamp()
         }));
 
         await Promise.all(p);
@@ -107,11 +111,11 @@ class ArenaModel extends ModelBase {
             const arena:Arena = {
                 id: i
                 , state: C.ArenaState.WAIT
-                , time: -1
+                , startAt: admin.firestore.FieldValue.serverTimestamp()
                 , title: ''
-                , url: ''
-                , agreement_url: ''
-                , agreement_scroll: -1
+                , scenarioUrl: ''
+                , agreementUrl: ''
+                , agreementScroll: -1
                 , characters: []
                 , start: ''
                 , end: ''
