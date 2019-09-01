@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
+import * as Moment from 'moment';
 
 import * as C from '../lib/Const';
 import * as ArrayUtil from '../lib/Array';
@@ -14,7 +15,7 @@ interface Charactors {
 interface Arena extends DocumentData {
     id: number
     state: C.ArenaState
-    startAt: FirebaseFirestore.FieldValue
+    endAt: FirebaseFirestore.Timestamp
     title: string
     scenarioUrl: string
     agreementUrl: string
@@ -22,8 +23,8 @@ interface Arena extends DocumentData {
     characters: Array<Charactors>
     startText: string
     endText: string
-    createdAt: FirebaseFirestore.FieldValue
-    updatedAt: FirebaseFirestore.FieldValue
+    createdAt: FirebaseFirestore.Timestamp
+    updatedAt: FirebaseFirestore.Timestamp
 }
 
 class ArenaModel extends ModelBase {
@@ -91,7 +92,7 @@ class ArenaModel extends ModelBase {
         })
         p.push(arenaSnapshot.ref.update({
             state: C.ArenaState.READY
-            , startAt: admin.firestore.FieldValue.serverTimestamp()
+            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(60, 'seconds').toDate())
             , title: scenario.title
             , scenarioUrl: scenario.scenarioUrl
             , agreementUrl: scenario.agreementUrl
@@ -99,7 +100,7 @@ class ArenaModel extends ModelBase {
             , characters: scenario.characters
             , startText: scenario.startText
             , endText: scenario.endText
-            , updateAt: admin.firestore.FieldValue.serverTimestamp()
+            , updateAt: admin.firestore.Timestamp.now()
         }));
 
         await Promise.all(p);
@@ -111,7 +112,7 @@ class ArenaModel extends ModelBase {
             const arena:Arena = {
                 id: i
                 , state: C.ArenaState.WAIT
-                , startAt: admin.firestore.FieldValue.serverTimestamp()
+                , endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate())
                 , title: ''
                 , scenarioUrl: ''
                 , agreementUrl: ''
@@ -119,8 +120,8 @@ class ArenaModel extends ModelBase {
                 , characters: []
                 , startText: ''
                 , endText: ''
-                , createdAt: admin.firestore.FieldValue.serverTimestamp()
-                , updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                , createdAt: admin.firestore.Timestamp.now()
+                , updatedAt: admin.firestore.Timestamp.now()
             };
             batch.create(this.ref.doc(), arena);
         }
