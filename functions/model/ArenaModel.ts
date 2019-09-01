@@ -20,8 +20,8 @@ interface Arena extends DocumentData {
     agreementUrl: string
     agreementScroll: number
     characters: Array<Charactors>
-    start: string
-    end: string
+    startText: string
+    endText: string
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
 }
@@ -97,8 +97,8 @@ class ArenaModel extends ModelBase {
             , agreementUrl: scenario.agreementUrl
             , agreementScroll: scenario.agreementScroll
             , characters: scenario.characters
-            , start: scenario.start
-            , end: scenario.end
+            , startText: scenario.startText
+            , endText: scenario.endText
             , updateAt: admin.firestore.FieldValue.serverTimestamp()
         }));
 
@@ -117,8 +117,8 @@ class ArenaModel extends ModelBase {
                 , agreementUrl: ''
                 , agreementScroll: -1
                 , characters: []
-                , start: ''
-                , end: ''
+                , startText: ''
+                , endText: ''
                 , createdAt: admin.firestore.FieldValue.serverTimestamp()
                 , updatedAt: admin.firestore.FieldValue.serverTimestamp()
             };

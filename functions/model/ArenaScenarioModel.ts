@@ -16,8 +16,8 @@ interface ArenaScenario extends DocumentData {
     agreementScroll: number
     characters: Array<Charactors>
     genderRate: Array<string>
-    start: string
-    end: string
+    startText: string
+    endText: string
     createdAt: admin.firestore.FieldValue
     updatedAt: admin.firestore.FieldValue
 }
@@ -67,8 +67,8 @@ class ArenaScenarioModel extends ModelBase {
             , agreementScroll: parseInt(l[3])
             , characters: characters
             , genderRate: genderRate
-            , start: l[5]
-            , end: l[6]
+            , startText: l[5]
+            , endText: l[6]
             , createdAt: admin.firestore.FieldValue.serverTimestamp()
             , updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }
