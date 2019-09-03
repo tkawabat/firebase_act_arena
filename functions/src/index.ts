@@ -51,10 +51,22 @@ export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate
     ;
 });
 
+export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.document('Arena/{arenaId}').onUpdate(async (
+    change: functions.Change<functions.firestore.DocumentSnapshot>
+    , context: functions.EventContext
+) => {
+    console.log('ArenaId: ' + context.params.arenaId);
+    const before = change.before.data() as FirebaseFirestore.DocumentData;
+    const after = change.after.data() as FirebaseFirestore.DocumentData;
+    await ArenaModel.stateTransition(before, after, context.params.arenaId);
+    //await ArenaModel.arenaUpdated(context.params.arenaId);
+});
+
 export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/RoomUser/{uid}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>
     , context: functions.EventContext
 ) => {
     console.log('ArenaId: ' + context.params.arenaId);
+    console.log('UserId: ' + context.params.uid);
     await ArenaModel.roomUserUpdated(context.params.arenaId);
 });

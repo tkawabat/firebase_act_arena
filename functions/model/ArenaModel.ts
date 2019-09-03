@@ -32,6 +32,73 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
+    private wait2ready = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                arena.update({
+                    state: C.ArenaState.CHECK
+                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate())
+                    , updatedAt: admin.firestore.Timestamp.now()
+                })
+                .then(resolve, reject)
+                .catch(() => console.error('stateTransition update Arena'))
+                ;
+            }, C.ArenaStateTime[C.ArenaState.WAIT] * 1000);
+        })
+        .catch((err) => console.error('promise'))
+        ;
+    }
+
+    private ready2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                arena.update({
+                    state: C.ArenaState.ACT
+                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate())
+                    , updatedAt: admin.firestore.Timestamp.now()
+                })
+                .then(resolve, reject)
+                .catch(() => console.error('stateTransition update Arena'))
+                ;
+            }, C.ArenaStateTime[C.ArenaState.CONFIRM] * 1000);
+        })
+        .catch((err) => console.error('promise'))
+        ;
+    }
+
+    private confirm2act = (arena:FirebaseFirestore.DocumentReference, after: FirebaseFirestore.DocumentData) :Promise<any> => {
+        return new Promise((resolve, reject) => {
+            setTimeout(async () => {
+                const p = [];
+                for (const c of after.characters) {
+                    p.push(arena.collection('RoomUser').doc(c.user).update({
+                        state: C.ArenaUserState.LISTNER
+                    }));
+                }
+                p.push(arena.update({
+                    state: C.ArenaState.WAIT
+                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate())
+                    , title: ''
+                    , scenarioUrl: ''
+                    , agreementUrl: ''
+                    , agreementScroll: -1
+                    , characters: []
+                    , startText: ''
+                    , endText: ''
+                    , updatedAt: admin.firestore.Timestamp.now()
+
+                }));
+
+                await Promise.all(p)
+                .then(resolve, reject)
+                .catch(() => console.error('stateTransition update Arena'))
+                ;
+            }, C.ArenaStateTime[C.ArenaState.ACT] * 1000);
+        })
+        .catch((err) => console.error('promise'))
+        ;
+    }
+
     private decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
         // 演者決め
         let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
@@ -92,7 +159,7 @@ class ArenaModel extends ModelBase {
         })
         p.push(arenaSnapshot.ref.update({
             state: C.ArenaState.READY
-            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(60, 'seconds').toDate())
+            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.READY], 'seconds').toDate())
             , title: scenario.title
             , scenarioUrl: scenario.scenarioUrl
             , agreementUrl: scenario.agreementUrl
@@ -100,10 +167,24 @@ class ArenaModel extends ModelBase {
             , characters: scenario.characters
             , startText: scenario.startText
             , endText: scenario.endText
-            , updateAt: admin.firestore.Timestamp.now()
+            , updatedAt: admin.firestore.Timestamp.now()
         }));
 
+        p.push(this.wait2ready(arenaSnapshot.ref));
         await Promise.all(p);
+    }
+
+    public stateTransition = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, arenaId:string) => {
+        console.log('before: '+before.state+', after: '+after.state);
+        if (before.state === after.state) return;
+        const state = after.state as C.ArenaState;
+
+        const arena = this.firestore.collection('Arena').doc(arenaId);
+        if (state === C.ArenaState.CHECK) {
+            await this.ready2confirm(arena);        
+        } else if (state === C.ArenaState.ACT) {
+            await this.confirm2act(arena, after);        
+        }
     }
 
     public createBatch = async (n: number) => {

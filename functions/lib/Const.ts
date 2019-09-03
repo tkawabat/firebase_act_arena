@@ -12,6 +12,14 @@ export enum ArenaState {
     , ACT = 4
 }
 
+export const ArenaStateTime = {
+        [ArenaState.WAIT]: -1
+        , [ArenaState.READY]: 8
+        , [ArenaState.CONFIRM]: 8
+        , [ArenaState.CHECK]: 8
+        , [ArenaState.ACT]: 13
+    }
+
 export enum ArenaUserState {
     LISTNER = 0
     , ENTRY = 1
