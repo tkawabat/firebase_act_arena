@@ -32,29 +32,12 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
-    private wait2ready = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
+    private transition2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 arena.update({
                     state: C.ArenaState.CHECK
                     , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate())
-                    , updatedAt: admin.firestore.Timestamp.now()
-                })
-                .then(resolve, reject)
-                .catch(() => console.error('stateTransition update Arena'))
-                ;
-            }, C.ArenaStateTime[C.ArenaState.WAIT] * 1000);
-        })
-        .catch((err) => console.error('promise'))
-        ;
-    }
-
-    private ready2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                arena.update({
-                    state: C.ArenaState.ACT
-                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate())
                     , updatedAt: admin.firestore.Timestamp.now()
                 })
                 .then(resolve, reject)
@@ -66,7 +49,24 @@ class ArenaModel extends ModelBase {
         ;
     }
 
-    private confirm2act = (arena:FirebaseFirestore.DocumentReference, after: FirebaseFirestore.DocumentData) :Promise<any> => {
+    private transition2check = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                arena.update({
+                    state: C.ArenaState.ACT
+                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate())
+                    , updatedAt: admin.firestore.Timestamp.now()
+                })
+                .then(resolve, reject)
+                .catch(() => console.error('stateTransition update Arena'))
+                ;
+            }, C.ArenaStateTime[C.ArenaState.CHECK] * 1000);
+        })
+        .catch((err) => console.error('promise'))
+        ;
+    }
+
+    private transition2act = (arena:FirebaseFirestore.DocumentReference, after: FirebaseFirestore.DocumentData) :Promise<any> => {
         return new Promise((resolve, reject) => {
             setTimeout(async () => {
                 const p = [];
@@ -158,8 +158,8 @@ class ArenaModel extends ModelBase {
             }));
         })
         p.push(arenaSnapshot.ref.update({
-            state: C.ArenaState.READY
-            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.READY], 'seconds').toDate())
+            state: C.ArenaState.CONFIRM
+            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds').toDate())
             , title: scenario.title
             , scenarioUrl: scenario.scenarioUrl
             , agreementUrl: scenario.agreementUrl
@@ -170,7 +170,7 @@ class ArenaModel extends ModelBase {
             , updatedAt: admin.firestore.Timestamp.now()
         }));
 
-        p.push(this.wait2ready(arenaSnapshot.ref));
+        p.push(this.transition2confirm(arenaSnapshot.ref));
         await Promise.all(p);
     }
 
@@ -181,9 +181,9 @@ class ArenaModel extends ModelBase {
 
         const arena = this.firestore.collection('Arena').doc(arenaId);
         if (state === C.ArenaState.CHECK) {
-            await this.ready2confirm(arena);        
+            await this.transition2check(arena);        
         } else if (state === C.ArenaState.ACT) {
-            await this.confirm2act(arena, after);        
+            await this.transition2act(arena, after);        
         }
     }
 

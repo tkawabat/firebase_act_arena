@@ -6,15 +6,13 @@ export enum Gender {
 
 export enum ArenaState {
     WAIT = 0
-    , READY = 1
-    , CONFIRM = 2
-    , CHECK = 3
-    , ACT = 4
+    , CONFIRM = 1
+    , CHECK = 2
+    , ACT = 3
 }
 
 export const ArenaStateTime = {
         [ArenaState.WAIT]: -1
-        , [ArenaState.READY]: 8
         , [ArenaState.CONFIRM]: 8
         , [ArenaState.CHECK]: 8
         , [ArenaState.ACT]: 13
