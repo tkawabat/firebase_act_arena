@@ -5,24 +5,24 @@ import * as program from 'commander'
 admin.initializeApp()
 admin.firestore().settings({ timestampsInSnapshots: true })
 
-//import UserModel from '../model/UserModel';
+import UserModel from '../model/UserModel';
 import ArenaModel from '../model/ArenaModel';
 import ArenaScenarioModel from '../model/ArenaScenarioModel';
 
 program.version('1.0.0', '-v, --version');
-// program
-//     .command('user')
-//     .option('-d, --delete', 'delete only the created documents')
-//     .option('-n, --number <n>', 'A number of test documents', parseInt, 0)
-//     .description('create test user documents')
-//     .action(cmd => {
-//         if (cmd.number > 10000) {
-//             console.error('The number must be 10000 or less');
-//             process.exit(-1);
-//         }
-//         const promise = cmd.delete ? deleteUsers() : createUsers(cmd.number)
-//         promise.then(() => console.log('Command has completed')).catch(console.error)
-//     });
+program
+    .command('user')
+    .option('-d, --delete', 'delete only the created documents')
+    .option('-n, --number <n>', 'A number of test documents', parseInt, 0)
+    .description('create test user documents')
+    .action(cmd => {
+        if (cmd.number > 10000) {
+            console.error('The number must be 10000 or less');
+            process.exit(-1);
+        }
+        const promise = cmd.delete ? UserModel.delete() : UserModel.createRondom(cmd.number)
+        promise.then(() => console.log('Command has completed')).catch(console.error)
+    });
 program
     .command('arena')
     .option('-d, --delete', 'delete all ')
