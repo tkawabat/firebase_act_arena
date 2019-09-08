@@ -7,10 +7,11 @@ import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
 import ArenaScenarioModel from './ArenaScenarioModel';
 
-interface Charactors {
+interface Characters {
     name: string
     gender: number
     user: string
+    userName: string
 }
 interface Arena extends DocumentData {
     id: number
@@ -20,7 +21,7 @@ interface Arena extends DocumentData {
     scenarioUrl: string
     agreementUrl: string
     agreementScroll: number
-    characters: Array<Charactors>
+    characters: Array<Characters>
     startText: string
     endText: string
     createdAt: FirebaseFirestore.Timestamp
@@ -73,7 +74,7 @@ class ArenaModel extends ModelBase {
                 for (const c of after.characters) {
                     p.push(arena.collection('RoomUser').doc(c.user).update({
                         state: C.ArenaUserState.LISTNER
-                    }));
+                    }).catch(() => {console.error('transition2act update RoomUser')}));
                 }
                 p.push(arena.update({
                     state: C.ArenaState.WAIT
@@ -86,8 +87,7 @@ class ArenaModel extends ModelBase {
                     , startText: ''
                     , endText: ''
                     , updatedAt: admin.firestore.Timestamp.now()
-
-                }));
+                }).catch(() => {console.error('transition2act update Arena')}));
 
                 await Promise.all(p)
                 .then(resolve, reject)
@@ -132,20 +132,23 @@ class ArenaModel extends ModelBase {
         // 不問以外を先に決める
         for (const [i, user] of users.entries()) {
             for (const [j, character] of scenario.characters.entries()) {
+                if (scenario.characters[j].user) continue;
                 if (character.gender === C.Gender.Unknown) continue;
                 if (character.gender !== user.gender) continue;
                 users[i].character = character;
                 scenario.characters[j].user = user.id;
+                scenario.characters[j].userName = user.name;
                 break;
             }
         }
         // 不問を決める
         for (const [i, user] of users.entries()) {
             for (const [j, character] of scenario.characters.entries()) {
+                if (scenario.characters[j].user) continue;
                 if (character.gender !== C.Gender.Unknown) continue;
                 if (user.character) continue;
-                users[i].character = character;
                 scenario.characters[j].user = user.id;
+                scenario.characters[j].userName = user.name;
                 break;
             }
         }
@@ -178,12 +181,20 @@ class ArenaModel extends ModelBase {
         console.log('before: '+before.state+', after: '+after.state);
         if (before.state === after.state) return;
         const state = after.state as C.ArenaState;
+        ;
 
         const arena = this.firestore.collection('Arena').doc(arenaId);
-        if (state === C.ArenaState.CHECK) {
-            await this.transition2check(arena);        
-        } else if (state === C.ArenaState.ACT) {
-            await this.transition2act(arena, after);        
+        switch (state) {
+            case C.ArenaState.WAIT:
+                const snapshot = await this.firestore.collection('Arena').doc(arenaId).get();
+                await this.decideProgram(snapshot);
+                break;
+            case C.ArenaState.CHECK:
+                await this.transition2check(arena);
+                break;
+            case C.ArenaState.ACT:
+                await this.transition2act(arena, after);
+                break;
         }
     }
 
