@@ -5,11 +5,19 @@ import * as program from 'commander'
 admin.initializeApp()
 admin.firestore().settings({ timestampsInSnapshots: true })
 
+import ConfigModel from '../model/ConfigModel';
 import UserModel from '../model/UserModel';
 import ArenaModel from '../model/ArenaModel';
 import ArenaScenarioModel from '../model/ArenaScenarioModel';
 
 program.version('1.0.0', '-v, --version');
+program
+    .command('config')
+    .description('create config documents')
+    .action(cmd => {
+        const promise = ConfigModel.create()
+        promise.then(() => console.log('Command has completed')).catch(console.error)
+    });
 program
     .command('user')
     .option('-d, --delete', 'delete only the created documents')
