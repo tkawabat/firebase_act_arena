@@ -7,7 +7,7 @@ import * as C from '../lib/Const';
 
 interface Config extends DocumentData {
     maintenance: string
-    version: number
+    version: string
     createdAt: FirebaseFirestore.Timestamp
     updatedAt: FirebaseFirestore.Timestamp
 }
@@ -22,7 +22,7 @@ class ConfigModel extends ModelBase {
         let batch = this.firestore.batch();
         const config: Config = {
             maintenance: '',
-            version: 1 * 1000 * 1000 + 0 * 1000 + 0,
+            version: '1.0.0',
             createdAt: admin.firestore.Timestamp.now(),
             updatedAt: admin.firestore.Timestamp.now(),
         }
