@@ -7,24 +7,17 @@ import ArenaModel from '../model/ArenaModel';
 
 export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
-    const batch = firestore.batch();
 
     const userCollection = firestore.collection('User');
     const userRef = userCollection.doc(user.uid);
 
-    try {
-        await batch.set(userRef, {
-            name: ''
-            , gender: -1
-            , iconUrl: ''
-        });
-
-        await batch.commit().then(() => {
-            console.log('add user success.');
-        })
-    } catch (e) {
-        console.log(`error occurs: ${e}`);
-    }
+    await userRef.set({
+        name: ''
+        , gender: -1
+        , iconUrl: ''
+    })
+    .catch((err) => console.error('user created'))
+    ;
 });
 
 export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
@@ -46,9 +39,9 @@ export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate
     }
 
     firestore.collection('Arena').doc(arena).collection('RoomUser').doc(uid).delete()
-    .then(() => console.log('ok'))
-    .catch(() => console.log('user delete error'))
-    ;
+        .then(() => console.log('ok'))
+        .catch(() => console.log('user delete error'))
+        ;
 });
 
 export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.document('Arena/{arenaId}').onUpdate(async (
