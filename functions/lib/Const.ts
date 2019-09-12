@@ -12,14 +12,16 @@ export enum ArenaState {
 }
 
 export const ArenaStateTime = {
-        [ArenaState.WAIT]: -1
-        , [ArenaState.CONFIRM]: 8
-        , [ArenaState.CHECK]: 8
-        , [ArenaState.ACT]: 13
-    }
+    [ArenaState.WAIT]: -1
+    , [ArenaState.CONFIRM]: 10 + 3
+    , [ArenaState.CHECK]: 10 + 3
+    , [ArenaState.ACT]: 15 + 3
+}
 
 export enum ArenaUserState {
     LISTNER = 0
     , ENTRY = 1
     , ACTOR = 2
 }
+
+export const ChatMax = 30;

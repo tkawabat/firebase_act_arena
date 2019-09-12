@@ -70,3 +70,12 @@ export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/Roo
     console.log('UserId: ' + context.params.uid);
     await ArenaModel.roomUserUpdated(context.params.arenaId);
 });
+
+export const chatUpdated = functions.firestore.document('Arena/{arenaId}/Chat/{chatId}').onCreate(async (
+    snapshot: functions.firestore.DocumentSnapshot
+    , context: functions.EventContext
+) => {
+    console.log('ArenaId: ' + context.params.arenaId);
+    console.log('ChatId: ' + context.params.chatId);
+    await ArenaModel.chatUpdated(context.params.arenaId);
+});

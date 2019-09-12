@@ -51,10 +51,14 @@ program
         const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
-program
-    .action(async cmd => {
-        console.log(await ArenaScenarioModel.getRandom(1,1));
-    })
+// program
+//     .command('chat')
+//     .option('-d, --delete', 'delete al')
+//     .action(cmd => {
+//         //const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
+//         const promise = ArenaModel.chatUpdated('jMrywCKGiPX1ENAfKjJj');
+//         promise.then(() => console.log('Command has completed')).catch(console.error);
+//     });
 program.parse(process.argv);
 
 console.log('Firestore Mocking CLI');

@@ -233,6 +233,22 @@ class ArenaModel extends ModelBase {
             await this.decideProgram(arenaSnapshot);
         }
     }
+
+    public chatUpdated = async (arenaId:string) => {
+        const chat = this.firestore.collection('Arena').doc(arenaId).collection('Chat');
+        const querySnapshot = await chat.orderBy('createdAt').get();
+        const n = querySnapshot.size - C.ChatMax;
+        if (!n) return;
+
+        const p = [];
+        for (let i = 0; i < n; i++) {
+            console.log('delete chat '+querySnapshot.docs[i].id);
+            p.push(chat.doc(querySnapshot.docs[i].id).delete());
+        }
+        await Promise.all(p)
+        .catch((err) => console.error('delete chat error'))
+        ;
+    }
 }
 
 export default new ArenaModel();
