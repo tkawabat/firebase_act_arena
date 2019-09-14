@@ -34,9 +34,23 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
+    private getState = async (id:string) :Promise<C.ArenaState> => {
+        return this.firestore.collection('Arena').doc(id).get()
+        .then((snapshot) => {
+            const data = snapshot.data();
+            if (!data) return null;
+            return data.state;
+        })
+        .catch((err) => console.error('get arena state '+id))
+        ;
+    }
+
     private transition2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
+            setTimeout(async () => {
+                const state = await this.getState(arena.id);
+                if (!state || state !== C.ArenaState.CONFIRM) return;
+
                 const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate();
                 arena.update({
                     state: C.ArenaState.CHECK,
@@ -55,7 +69,10 @@ class ArenaModel extends ModelBase {
 
     private transition2check = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
         return new Promise((resolve, reject) => {
-            setTimeout(() => {
+            setTimeout(async () => {
+                const state = await this.getState(arena.id);
+                if (!state || state !== C.ArenaState.CHECK) return;
+
                 const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate();
                 arena.update({
                     state: C.ArenaState.ACT,
@@ -75,6 +92,9 @@ class ArenaModel extends ModelBase {
     private transition2act = (arena:FirebaseFirestore.DocumentReference, after: FirebaseFirestore.DocumentData) :Promise<any> => {
         return new Promise((resolve, reject) => {
             setTimeout(async () => {
+                const state = await this.getState(arena.id);
+                if (!state || state !== C.ArenaState.ACT) return;
+
                 const p = [];
                 for (const c of after.characters) {
                     p.push(arena.collection('RoomUser').doc(c.user).update({
@@ -248,7 +268,7 @@ class ArenaModel extends ModelBase {
         return this.firestore.collection('Arena').doc(arenaId).update({
             state: C.ArenaState.WAIT,
             endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-            message: '接続エラー\上演を強制終了します',
+            message: '演者の接続エラー\n上演を強制終了します',
             updatedAt: admin.firestore.Timestamp.now(),
         });
     }
