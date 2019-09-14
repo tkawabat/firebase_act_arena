@@ -4,44 +4,44 @@ import * as functions from 'firebase-functions';
 admin.initializeApp(functions.config().firebase);
 
 import ArenaModel from '../model/ArenaModel';
+import UserModel from '../model/UserModel';
 
 export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
-
     const userCollection = firestore.collection('User');
     const userRef = userCollection.doc(user.uid);
 
     await userRef.set({
-        name: ''
-        , gender: -1
-        , iconUrl: ''
+        name: '',
+        gender: -1,
+        iconUrl: null,
+        arena: '',
+        connect: true,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     })
     .catch((err) => console.error('user created'))
     ;
 });
 
 export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
-    if (change.after.val().state !== 0) {
-        return;
-    }
-    const uid = change.after.key;
-    console.log('uid: '+uid);
-
+    const userId = change.after.key;
     const firestore = admin.firestore();
-    const arena:string = await firestore.collection('User').doc(uid).get().then((snapshot) => {
-        const data = snapshot.data();
-        if (!data) return '';
-        return data.arena as string;
-    });
-    if (arena === '') {
-        console.log('no data');
-        return;
-    }
+    await firestore.collection('User').doc(userId).update({
+        connect: change.after.val().state as number === 1
+    })
+    .catch((err) => console.error('update User connect'))
+    ;
+});
 
-    firestore.collection('Arena').doc(arena).collection('RoomUser').doc(uid).delete()
-        .then(() => console.log('ok'))
-        .catch(() => console.log('user delete error'))
-        ;
+export const userUpdated = functions.firestore.document('User/{userId}').onUpdate(async (
+    change: functions.Change<functions.firestore.DocumentSnapshot>
+    , context: functions.EventContext
+) => {
+    console.log('UserId: ' + context.params.userId);
+    const before = change.before.data() as FirebaseFirestore.DocumentData;
+    const after = change.after.data() as FirebaseFirestore.DocumentData;
+    await UserModel.updated(before, after, context.params.userId);
 });
 
 export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.document('Arena/{arenaId}').onUpdate(async (

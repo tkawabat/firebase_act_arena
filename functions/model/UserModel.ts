@@ -10,6 +10,7 @@ interface User extends DocumentData {
     name: string
     gender: number
     //iconUrl: string
+    connect: boolean
     arena: string
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
@@ -19,19 +20,39 @@ class UserModel extends ModelBase {
     constructor() {
         super('User');
     }
+
+    private disconnected = (documentData:FirebaseFirestore.DocumentData, userId:string) => {
+        if (!documentData.arena || documentData.arena === '') {
+            console.error('no arena in user ' + userId);
+            return;
+        }
+
+        if (documentData.connect as boolean !== false) {
+            console.log('User connected')
+            return;
+        }
+
+        this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
+            .then(() => console.log('RoomUser deleted'))
+            .catch(() => {
+                console.error('roomUser delete error');
+            })
+            ;
+    }
     
     public createRondom = async (n: number) => {
         let batch = this.firestore.batch();
         for (let i = 0; i < n; i++) {
             const gender = faker.random.number({min:1, max:2});
             const user: User = {
-                name: faker.name.firstName()
-                , gender: gender
-                //, iconUrl: null
-                , arena: ''
-                , fake: 1
-                , createdAt: admin.firestore.FieldValue.serverTimestamp()
-                , updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                name: faker.name.firstName(),
+                gender: gender,
+                iconUrl: null,
+                arena: '',
+                connect: true,
+                fake: 1,
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             }
             batch.create(this.ref.doc(), user);
             if (i >= this.batchSize) {
@@ -42,6 +63,12 @@ class UserModel extends ModelBase {
         }
 
         await this.commit(batch);
+    }
+
+    public updated = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, userId:string) => {
+        if (before.connect as boolean === true && after.connect as boolean === false) {
+            this.disconnected(after, userId);
+        }
     }
 }
 

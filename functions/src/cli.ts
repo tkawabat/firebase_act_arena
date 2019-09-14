@@ -1,8 +1,9 @@
-import * as admin from 'firebase-admin'
-import * as program from 'commander'
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+import * as program from 'commander';
 
 // user.ts を import する前に Admin SDK を初期化する
-admin.initializeApp()
+admin.initializeApp(functions.config().firebase);
 admin.firestore().settings({ timestampsInSnapshots: true })
 
 import ConfigModel from '../model/ConfigModel';
@@ -51,14 +52,13 @@ program
         const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
-// program
-//     .command('chat')
-//     .option('-d, --delete', 'delete al')
-//     .action(cmd => {
-//         //const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
-//         const promise = ArenaModel.chatUpdated('jMrywCKGiPX1ENAfKjJj');
-//         promise.then(() => console.log('Command has completed')).catch(console.error);
-//     });
+program
+    .command('test')
+    .action(cmd => {
+        //const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
+        //const promise = UserModel.disconnected('a8EXylGkD3Xb1dVHZ04AnZHjfRs2');
+        //promise.then(() => console.log('Command has completed')).catch(console.error);
+    });
 program.parse(process.argv);
 
 console.log('Firestore Mocking CLI');
