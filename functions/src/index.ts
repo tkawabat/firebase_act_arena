@@ -55,13 +55,24 @@ export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.d
     //await ArenaModel.arenaUpdated(context.params.arenaId);
 });
 
-export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/RoomUser/{uid}').onUpdate(async (
-    change: functions.Change<functions.firestore.DocumentSnapshot>
-    , context: functions.EventContext
+export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
+    change: functions.Change<functions.firestore.DocumentSnapshot>,
+    context: functions.EventContext,
 ) => {
     console.log('ArenaId: ' + context.params.arenaId);
-    console.log('UserId: ' + context.params.uid);
+    console.log('UserId: ' + context.params.userId);
     await ArenaModel.roomUserUpdated(context.params.arenaId);
+});
+
+export const roomUserDeleted = functions.firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
+    snapshot: FirebaseFirestore.DocumentSnapshot,
+    context: functions.EventContext,
+) => {
+    console.log('ArenaId: ' + context.params.arenaId);
+    console.log('UserId: ' + context.params.userId);
+    const data = snapshot.data();
+    if (!data) return;
+    await ArenaModel.roomUserDeleted(data, context.params.arenaId);
 });
 
 export const chatUpdated = functions.firestore.document('Arena/{arenaId}/Chat/{chatId}').onCreate(async (

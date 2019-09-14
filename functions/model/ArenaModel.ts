@@ -24,6 +24,7 @@ interface Arena extends DocumentData {
     characters: Array<Characters>
     startText: string
     endText: string
+    message: string
     createdAt: FirebaseFirestore.Timestamp
     updatedAt: FirebaseFirestore.Timestamp
 }
@@ -36,10 +37,12 @@ class ArenaModel extends ModelBase {
     private transition2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
+                const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate();
                 arena.update({
-                    state: C.ArenaState.CHECK
-                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate())
-                    , updatedAt: admin.firestore.Timestamp.now()
+                    state: C.ArenaState.CHECK,
+                    endAt: admin.firestore.Timestamp.fromDate(endAt),
+                    message: '台本チェック',
+                    updatedAt: admin.firestore.Timestamp.now(),
                 })
                 .then(resolve, reject)
                 .catch(() => console.error('stateTransition update Arena'))
@@ -53,10 +56,12 @@ class ArenaModel extends ModelBase {
     private transition2check = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
+                const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate();
                 arena.update({
-                    state: C.ArenaState.ACT
-                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate())
-                    , updatedAt: admin.firestore.Timestamp.now()
+                    state: C.ArenaState.ACT,
+                    endAt: admin.firestore.Timestamp.fromDate(endAt),
+                    message: '上演開始',
+                    updatedAt: admin.firestore.Timestamp.now(),
                 })
                 .then(resolve, reject)
                 .catch(() => console.error('stateTransition update Arena'))
@@ -77,16 +82,17 @@ class ArenaModel extends ModelBase {
                     }).catch(() => {console.error('transition2act update RoomUser')}));
                 }
                 p.push(arena.update({
-                    state: C.ArenaState.WAIT
-                    , endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate())
-                    , title: ''
-                    , scenarioUrl: ''
-                    , agreementUrl: ''
-                    , agreementScroll: -1
-                    , characters: []
-                    , startText: ''
-                    , endText: ''
-                    , updatedAt: admin.firestore.Timestamp.now()
+                    state: C.ArenaState.WAIT,
+                    endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+                    title: '',
+                    scenarioUrl: '',
+                    agreementUrl: '',
+                    agreementScroll: -1,
+                    characters: [],
+                    startText: '',
+                    endText: '',
+                    message: '上演終了',
+                    updatedAt: admin.firestore.Timestamp.now(),
                 }).catch(() => {console.error('transition2act update Arena')}));
 
                 await Promise.all(p)
@@ -160,17 +166,18 @@ class ArenaModel extends ModelBase {
                 state: C.ArenaUserState.ACTOR
             }));
         })
+        const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds').toDate();
         p.push(arenaSnapshot.ref.update({
-            state: C.ArenaState.CONFIRM
-            , endAt: admin.firestore.Timestamp.fromDate(Moment().add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds').toDate())
-            , title: scenario.title
-            , scenarioUrl: scenario.scenarioUrl
-            , agreementUrl: scenario.agreementUrl
-            , agreementScroll: scenario.agreementScroll
-            , characters: scenario.characters
-            , startText: scenario.startText
-            , endText: scenario.endText
-            , updatedAt: admin.firestore.Timestamp.now()
+            state: C.ArenaState.CONFIRM,
+            endAt: admin.firestore.Timestamp.fromDate(endAt),
+            title: scenario.title,
+            scenarioUrl: scenario.scenarioUrl,
+            agreementUrl: scenario.agreementUrl,
+            agreementScroll: scenario.agreementScroll,
+            characters: scenario.characters,
+            startText: scenario.startText,
+            endText: scenario.endText,
+            updatedAt: admin.firestore.Timestamp.now(),
         }));
 
         p.push(this.transition2confirm(arenaSnapshot.ref));
@@ -202,18 +209,19 @@ class ArenaModel extends ModelBase {
         const batch = this.firestore.batch();
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
-                id: i
-                , state: C.ArenaState.WAIT
-                , endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate())
-                , title: ''
-                , scenarioUrl: ''
-                , agreementUrl: ''
-                , agreementScroll: -1
-                , characters: []
-                , startText: ''
-                , endText: ''
-                , createdAt: admin.firestore.Timestamp.now()
-                , updatedAt: admin.firestore.Timestamp.now()
+                id: i,
+                state: C.ArenaState.WAIT,
+                endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+                title: '',
+                scenarioUrl: '',
+                agreementUrl: '',
+                agreementScroll: -1,
+                characters: [],
+                startText: '',
+                endText: '',
+                message: '',
+                createdAt: admin.firestore.Timestamp.now(),
+                updatedAt: admin.firestore.Timestamp.now(),
             };
             batch.create(this.ref.doc(), arena);
         }
@@ -232,6 +240,17 @@ class ArenaModel extends ModelBase {
             console.log('state is WAIT');
             await this.decideProgram(arenaSnapshot);
         }
+    }
+
+    public roomUserDeleted = async (roomUser:admin.firestore.DocumentData, arenaId:string) => {
+        if (roomUser.state as C.ArenaUserState !== C.ArenaUserState.ACTOR) return;
+
+        return this.firestore.collection('Arena').doc(arenaId).update({
+            state: C.ArenaState.WAIT,
+            endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+            message: '接続エラー\上演を強制終了します',
+            updatedAt: admin.firestore.Timestamp.now(),
+        });
     }
 
     public chatUpdated = async (arenaId:string) => {

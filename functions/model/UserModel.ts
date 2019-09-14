@@ -21,7 +21,7 @@ class UserModel extends ModelBase {
         super('User');
     }
 
-    private disconnected = (documentData:FirebaseFirestore.DocumentData, userId:string) => {
+    private disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<void> => {
         if (!documentData.arena || documentData.arena === '') {
             console.error('no arena in user ' + userId);
             return;
@@ -32,12 +32,12 @@ class UserModel extends ModelBase {
             return;
         }
 
-        this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
+        return this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
             .then(() => console.log('RoomUser deleted'))
             .catch(() => {
                 console.error('roomUser delete error');
             })
-            ;
+        ;
     }
     
     public createRondom = async (n: number) => {
@@ -67,7 +67,7 @@ class UserModel extends ModelBase {
 
     public updated = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, userId:string) => {
         if (before.connect as boolean === true && after.connect as boolean === false) {
-            this.disconnected(after, userId);
+            return this.disconnected(after, userId);
         }
     }
 }
