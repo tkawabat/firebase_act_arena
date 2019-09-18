@@ -9,8 +9,7 @@ import * as C from '../lib/Const';
 interface User extends DocumentData {
     name: string
     gender: number
-    //iconUrl: string
-    connect: boolean
+    iconUrl: string
     arena: string
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
@@ -24,11 +23,6 @@ class UserModel extends ModelBase {
     public disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<void> => {
         if (!documentData.arena || documentData.arena === '') {
             console.error('no arena in user ' + userId);
-            return;
-        }
-
-        if (documentData.connect as boolean !== false) {
-            console.log('User connected')
             return;
         }
 
@@ -47,9 +41,8 @@ class UserModel extends ModelBase {
             const user: User = {
                 name: faker.name.firstName(),
                 gender: gender,
-                iconUrl: null,
+                iconUrl: '',
                 arena: '',
-                connect: true,
                 fake: 1,
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
