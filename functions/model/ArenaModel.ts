@@ -273,7 +273,7 @@ class ArenaModel extends ModelBase {
         });
     }
 
-    public chatUpdated = async (arenaId:string) => {
+    public checkAndDeleteChat = async (arenaId:string) => {
         const chat = this.firestore.collection('Arena').doc(arenaId).collection('Chat');
         const querySnapshot = await chat.orderBy('createdAt').get();
         const n = querySnapshot.size - C.ChatMax;
