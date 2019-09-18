@@ -21,7 +21,7 @@ class UserModel extends ModelBase {
         super('User');
     }
 
-    private disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<void> => {
+    public disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<void> => {
         if (!documentData.arena || documentData.arena === '') {
             console.error('no arena in user ' + userId);
             return;

@@ -27,22 +27,32 @@ export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
 export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
     const userId = change.after.key;
     const firestore = admin.firestore();
+
+    // update user connect
     await firestore.collection('User').doc(userId).update({
         connect: change.after.val().state as number === 1
     })
     .catch((err) => console.error('update User connect'))
     ;
+
+    // delete room user
+    const documentData = await firestore.collection('User').doc(userId).get().then((snapshot) => {
+        return snapshot.data();
+    });
+    if (documentData) {
+        await UserModel.disconnected(documentData, userId);
+    }
 });
 
-export const userUpdated = functions.firestore.document('User/{userId}').onUpdate(async (
-    change: functions.Change<functions.firestore.DocumentSnapshot>
-    , context: functions.EventContext
-) => {
-    console.log('UserId: ' + context.params.userId);
-    const before = change.before.data() as FirebaseFirestore.DocumentData;
-    const after = change.after.data() as FirebaseFirestore.DocumentData;
-    await UserModel.updated(before, after, context.params.userId);
-});
+// export const userUpdated = functions.firestore.document('User/{userId}').onUpdate(async (
+//     change: functions.Change<functions.firestore.DocumentSnapshot>
+//     , context: functions.EventContext
+// ) => {
+//     console.log('UserId: ' + context.params.userId);
+//     const before = change.before.data() as FirebaseFirestore.DocumentData;
+//     const after = change.after.data() as FirebaseFirestore.DocumentData;
+//     await UserModel.updated(before, after, context.params.userId);
+// });
 
 export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.document('Arena/{arenaId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>
