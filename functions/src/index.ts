@@ -36,11 +36,13 @@ export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate
     ;
 
     // delete room user
-    const documentData = await firestore.collection('User').doc(userId).get().then((snapshot) => {
-        return snapshot.data();
-    });
-    if (documentData) {
-        await UserModel.disconnected(documentData, userId);
+    if (change.after.val().state as number === 0) {
+        const documentData = await firestore.collection('User').doc(userId).get().then((snapshot) => {
+            return snapshot.data();
+        });
+        if (documentData) {
+            await UserModel.disconnected(documentData, userId);
+        }
     }
 });
 
