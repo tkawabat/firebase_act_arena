@@ -95,30 +95,7 @@ class ArenaModel extends ModelBase {
                 const state = await this.getState(arena.id);
                 if (!state || state !== C.ArenaState.ACT) return;
 
-                const p = [];
-                for (const c of after.characters) {
-                    p.push(arena.collection('RoomUser').doc(c.user).update({
-                        state: C.ArenaUserState.LISTNER
-                    }).catch(() => {console.error('transition2act update RoomUser')}));
-                }
-                p.push(arena.update({
-                    state: C.ArenaState.WAIT,
-                    endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-                    title: '',
-                    scenarioUrl: '',
-                    agreementUrl: '',
-                    agreementScroll: -1,
-                    characters: [],
-                    startText: '',
-                    endText: '',
-                    message: '上演終了',
-                    updatedAt: admin.firestore.Timestamp.now(),
-                }).catch(() => {console.error('transition2act update Arena')}));
-
-                await Promise.all(p)
-                .then(resolve, reject)
-                .catch(() => console.error('stateTransition update Arena'))
-                ;
+                await this.asyncTerminateAct(arena, '上演終了');
             }, C.ArenaStateTime[C.ArenaState.ACT] * 1000);
         })
         .catch((err) => console.error('promise'))
@@ -204,6 +181,40 @@ class ArenaModel extends ModelBase {
         await Promise.all(p);
     }
 
+    private asyncTerminateAct = async (arena:FirebaseFirestore.DocumentReference, message:string) => {
+        const p = [];
+
+        const snapshot = await arena.get();
+        const data = snapshot.data();
+        if (data !== undefined) {
+            for (const c of data.characters) {
+                p.push(arena.collection('RoomUser').doc(c.user).update({
+                    state: C.ArenaUserState.LISTNER
+                })
+                .catch(() => { console.error('asyncTerminateAct update RoomUser') })
+                );
+            }
+        }
+
+        p.push(this.ref.doc(arena.id).update({
+            state: C.ArenaState.WAIT,
+            endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+            title: '',
+            scenarioUrl: '',
+            agreementUrl: '',
+            agreementScroll: -1,
+            characters: [],
+            startText: '',
+            endText: '',
+            message: message,
+            updatedAt: admin.firestore.Timestamp.now(),
+        })
+        .catch(() => { console.error('asyncTerminateAct update Arena') })
+        );
+
+        return Promise.all(p);
+    }
+
     public stateTransition = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, arenaId:string) => {
         console.log('before: '+before.state+', after: '+after.state);
         if (before.state === after.state) return;
@@ -265,12 +276,8 @@ class ArenaModel extends ModelBase {
     public roomUserDeleted = async (roomUser:admin.firestore.DocumentData, arenaId:string) => {
         if (roomUser.state as C.ArenaUserState !== C.ArenaUserState.ACTOR) return;
 
-        return this.firestore.collection('Arena').doc(arenaId).update({
-            state: C.ArenaState.WAIT,
-            endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-            message: '演者の接続エラー\n上演を強制終了します',
-            updatedAt: admin.firestore.Timestamp.now(),
-        });
+        const arena = await this.ref.doc(arenaId);
+        await this.asyncTerminateAct(arena, '演者の接続エラー\n上演を強制終了します');
     }
 
     public checkAndDeleteChat = async (arenaId:string) => {
