@@ -5,7 +5,7 @@ import { DocumentData } from '@google-cloud/firestore';
 import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
 
-interface Charactors extends DocumentData {
+interface Characters extends DocumentData {
     name: string
     gender: number
 }
@@ -14,7 +14,7 @@ interface ArenaScenario extends DocumentData {
     scenarioUrl: string
     agreementUrl: string
     agreementScroll: number
-    characters: Array<Charactors>
+    characters: Array<Characters>
     genderRate: Array<string>
     startText: string
     endText: string
