@@ -163,9 +163,15 @@ class ArenaModel extends ModelBase {
                 state: C.ArenaUserState.ACTOR
             }));
         })
-        const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds').toDate();
+        const endAt = Moment()
+            .add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds')
+            .add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds')
+            .add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds')
+            .toDate()
+        ;
         p.push(arenaSnapshot.ref.update({
-            state: C.ArenaState.CONFIRM,
+            //state: C.ArenaState.CONFIRM,
+            state: C.ArenaState.WAIT, // 一旦使わない
             endAt: admin.firestore.Timestamp.fromDate(endAt),
             title: scenario.title,
             scenarioUrl: scenario.scenarioUrl,
@@ -174,6 +180,7 @@ class ArenaModel extends ModelBase {
             characters: scenario.characters,
             startText: scenario.startText,
             endText: scenario.endText,
+            message: '',
             updatedAt: admin.firestore.Timestamp.now(),
         }));
 
@@ -228,10 +235,10 @@ class ArenaModel extends ModelBase {
                 await this.decideProgram(snapshot);
                 break;
             case C.ArenaState.CHECK:
-                await this.transition2check(arena);
+                //await this.transition2check(arena);
                 break;
             case C.ArenaState.ACT:
-                await this.transition2act(arena, after);
+                //await this.transition2act(arena, after);
                 break;
         }
     }
