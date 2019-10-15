@@ -11,6 +11,7 @@ interface User extends DocumentData {
     gender: number
     iconUrl: string
     arena: string
+    ngList: Array<String>
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
 }
@@ -43,6 +44,7 @@ class UserModel extends ModelBase {
                 gender: gender,
                 iconUrl: '',
                 arena: '',
+                ngList: [],
                 fake: 1,
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
