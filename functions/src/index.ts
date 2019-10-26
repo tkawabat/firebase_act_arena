@@ -6,7 +6,8 @@ admin.initializeApp(functions.config().firebase);
 import ArenaModel from '../model/ArenaModel';
 import UserModel from '../model/UserModel';
 
-export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
+
+export const createAccountDoc = functions.runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
     const userCollection = firestore.collection('User');
     const userRef = userCollection.doc(user.uid);
@@ -24,7 +25,7 @@ export const createAccountDoc = functions.auth.user().onCreate(async (user) => {
     ;
 });
 
-export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
+export const userStatusUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
     const userId = change.after.key;
     const firestore = admin.firestore();
 
@@ -56,7 +57,7 @@ export const userStatusUpdated = functions.database.ref('status/{uid}').onUpdate
 //     await UserModel.updated(before, after, context.params.userId);
 // });
 
-export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.document('Arena/{arenaId}').onUpdate(async (
+export const arenaUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>
     , context: functions.EventContext
 ) => {
@@ -70,7 +71,7 @@ export const arenaUpdated = functions.runWith({timeoutSeconds: 300}).firestore.d
     await Promise.all(p);
 });
 
-export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
+export const roomUserUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>,
     context: functions.EventContext,
 ) => {
@@ -79,7 +80,7 @@ export const roomUserUpdated = functions.firestore.document('Arena/{arenaId}/Roo
     await ArenaModel.roomUserUpdated(context.params.arenaId);
 });
 
-export const roomUserDeleted = functions.firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
+export const roomUserDeleted = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
     snapshot: FirebaseFirestore.DocumentSnapshot,
     context: functions.EventContext,
 ) => {
