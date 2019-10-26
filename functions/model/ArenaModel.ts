@@ -67,41 +67,6 @@ class ArenaModel extends ModelBase {
         ;
     }
 
-    private transition2check = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
-        return new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                const state = await this.getState(arena.id);
-                if (!state || state !== C.ArenaState.CHECK) return;
-
-                const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds').toDate();
-                arena.update({
-                    state: C.ArenaState.ACT,
-                    endAt: admin.firestore.Timestamp.fromDate(endAt),
-                    message: '上演開始',
-                    updatedAt: admin.firestore.Timestamp.now(),
-                })
-                .then(resolve, reject)
-                .catch(() => console.error('stateTransition update Arena'))
-                ;
-            }, C.ArenaStateTime[C.ArenaState.CHECK] * 1000);
-        })
-        .catch((err) => console.error('promise'))
-        ;
-    }
-
-    private transition2act = (arena:FirebaseFirestore.DocumentReference, after: FirebaseFirestore.DocumentData) :Promise<any> => {
-        return new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                const state = await this.getState(arena.id);
-                if (!state || state !== C.ArenaState.ACT) return;
-
-                await this.asyncTerminateAct(arena, '上演終了');
-            }, C.ArenaStateTime[C.ArenaState.ACT] * 1000);
-        })
-        .catch((err) => console.error('promise'))
-        ;
-    }
-
     private decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
         // 演者決め
         let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
@@ -184,7 +149,7 @@ class ArenaModel extends ModelBase {
             updatedAt: admin.firestore.Timestamp.now(),
         }));
 
-        p.push(this.transition2confirm(arenaSnapshot.ref));
+        //p.push(this.transition2confirm(arenaSnapshot.ref));
         await Promise.all(p);
     }
 
@@ -223,24 +188,10 @@ class ArenaModel extends ModelBase {
     }
 
     public stateTransition = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, arenaId:string) => {
-        console.log('before: '+before.state+', after: '+after.state);
-        if (before.state === after.state) return;
-        const state = after.state as C.ArenaState;
-        ;
-
-        const arena = this.firestore.collection('Arena').doc(arenaId);
-        switch (state) {
-            case C.ArenaState.WAIT:
-                const snapshot = await this.firestore.collection('Arena').doc(arenaId).get();
-                await this.decideProgram(snapshot);
-                break;
-            case C.ArenaState.CHECK:
-                //await this.transition2check(arena);
-                break;
-            case C.ArenaState.ACT:
-                //await this.transition2act(arena, after);
-                break;
-        }
+        if (Moment(after.endAt) > Moment()) return;
+        
+        const snapshot = await this.firestore.collection('Arena').doc(arenaId).get();
+        await this.decideProgram(snapshot);
     }
 
     public createBatch = async (n: number) => {
