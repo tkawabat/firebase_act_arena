@@ -67,7 +67,11 @@ class ArenaModel extends ModelBase {
         ;
     }
 
-    private decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
+    public decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
+        const arena = arenaSnapshot.data();
+        if (!arena) return;
+        if (Moment(arena.endAt.toDate()).isAfter(Moment())) return;
+
         // 演者決め
         let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
             return snapshot.docs.map((value) => {
@@ -188,8 +192,6 @@ class ArenaModel extends ModelBase {
     }
 
     public stateTransition = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, arenaId:string) => {
-        if (Moment(after.endAt) > Moment()) return;
-        
         const snapshot = await this.firestore.collection('Arena').doc(arenaId).get();
         await this.decideProgram(snapshot);
     }
