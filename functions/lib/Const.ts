@@ -14,8 +14,8 @@ export enum ArenaState {
 export const ArenaStateTime = {
     [ArenaState.WAIT]: -1
     , [ArenaState.READ]: 60 + 3
-    , [ArenaState.CHECK]: 30 + 3
-    , [ArenaState.ACT]: 180 + 3
+    , [ArenaState.CHECK]: 30 + 1
+    , [ArenaState.ACT]: 180 + 1
 }
 
 export enum ArenaUserState {
