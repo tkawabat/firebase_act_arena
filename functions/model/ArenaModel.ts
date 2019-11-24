@@ -24,9 +24,7 @@ interface Arena extends DocumentData {
     startText: string
     endText: string
     message: string
-    readEndAt: FirebaseFirestore.Timestamp
-    checkEndAt: FirebaseFirestore.Timestamp
-    actEndAt: FirebaseFirestore.Timestamp
+    endAt: Array<FirebaseFirestore.Timestamp>
     createdAt: FirebaseFirestore.Timestamp
     updatedAt: FirebaseFirestore.Timestamp
 }
@@ -39,7 +37,7 @@ class ArenaModel extends ModelBase {
     public decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
         const arena = arenaSnapshot.data();
         if (!arena) return;
-        if (Moment(arena.actEndAt.toDate()).isAfter(Moment())) return;
+        if (Moment(arena.endAt[C.ArenaState.ACT].toDate()).isAfter(Moment())) return;
 
         // 演者決め
         let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
@@ -102,10 +100,14 @@ class ArenaModel extends ModelBase {
             }));
         })
 
-        const readEndAt = Moment().add(C.ArenaStateTime[C.ArenaState.READ], 'seconds');
-        const checkEndAt = Moment(readEndAt).add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds');
-        const actEndAt = Moment(checkEndAt).add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds');
-        
+        const endAt = [];
+        let t = Moment().add(C.ArenaStateTime[C.ArenaState.READ], 'seconds');
+        endAt[C.ArenaState.READ] = t.toDate();
+        t = Moment(t).add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds')
+        endAt[C.ArenaState.CHECK] = t.toDate();
+        t = Moment(t).add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds')
+        endAt[C.ArenaState.ACT] = t.toDate();
+
         p.push(arenaSnapshot.ref.update({
             //state: C.ArenaState.CONFIRM,
             state: C.ArenaState.WAIT, // 一旦使わない
@@ -117,9 +119,7 @@ class ArenaModel extends ModelBase {
             startText: scenario.startText,
             endText: scenario.endText,
             message: '',
-            readEndAt: admin.firestore.Timestamp.fromDate(readEndAt.toDate()),
-            checkEndAt: admin.firestore.Timestamp.fromDate(checkEndAt.toDate()),
-            actEndAt: admin.firestore.Timestamp.fromDate(actEndAt.toDate()),
+            endAt: endAt,
             updatedAt: admin.firestore.Timestamp.now(),
         }));
 
@@ -142,6 +142,12 @@ class ArenaModel extends ModelBase {
             }
         }
 
+        const endAt = [];
+        const t = admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate());
+        endAt[C.ArenaState.READ] = t;
+        endAt[C.ArenaState.CHECK] = t;
+        endAt[C.ArenaState.ACT] = t;
+
         p.push(this.ref.doc(arena.id).update({
             state: C.ArenaState.WAIT,
             title: '',
@@ -152,9 +158,7 @@ class ArenaModel extends ModelBase {
             startText: '',
             endText: '',
             message: message,
-            readEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-            checkEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-            actEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+            endAt: endAt,
             updatedAt: admin.firestore.Timestamp.now(),
         })
         .catch(() => { console.error('asyncTerminateAct update Arena') })
@@ -170,6 +174,12 @@ class ArenaModel extends ModelBase {
 
     public createBatch = async (n: number) => {
         const batch = this.firestore.batch();
+        const endAt = [];
+        const t = admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate());
+        endAt[C.ArenaState.READ] = t;
+        endAt[C.ArenaState.CHECK] = t;
+        endAt[C.ArenaState.ACT] = t;
+
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
                 id: i,
@@ -182,9 +192,7 @@ class ArenaModel extends ModelBase {
                 startText: '',
                 endText: '',
                 message: '',
-                readEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-                checkEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
-                actEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+                endAt: endAt,
                 createdAt: admin.firestore.Timestamp.now(),
                 updatedAt: admin.firestore.Timestamp.now(),
             };
@@ -201,10 +209,8 @@ class ArenaModel extends ModelBase {
             console.error('arena not found');
             return;
         }
-        if (arena.state === 0) {
-            console.log('state is WAIT');
-            await this.decideProgram(arenaSnapshot);
-        }
+        
+        await this.decideProgram(arenaSnapshot);
     }
 
     public roomUserDeleted = async (roomUser:admin.firestore.DocumentData, arenaId:string) => {

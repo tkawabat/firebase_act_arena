@@ -5,16 +5,16 @@ export enum Gender {
 }
 
 export enum ArenaState {
-    WAIT = 0
-    , READ = 1
-    , CHECK = 2
-    , ACT = 3
+    WAIT = -1
+    , READ = 0
+    , CHECK = 1
+    , ACT = 2
 }
 
 export const ArenaStateTime = {
     [ArenaState.WAIT]: -1
     , [ArenaState.READ]: 60 + 3
-    , [ArenaState.CHECK]: 30 + 1
+    , [ArenaState.CHECK]: 30
     , [ArenaState.ACT]: 180 + 1
 }
 

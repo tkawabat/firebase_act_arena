@@ -58,6 +58,11 @@ program
         //const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         //const promise = UserModel.disconnected('a8EXylGkD3Xb1dVHZ04AnZHjfRs2');
         //promise.then(() => console.log('Command has completed')).catch(console.error);
+
+        // const promise = admin.firestore().collection('Arena').doc('ek7D1GuJUk9PBuMsORmp').get()
+        // .then(async (snapshot) => {
+        //     await ArenaModel.decideProgram(snapshot);
+        // });
     });
 program.parse(process.argv);
 
