@@ -16,7 +16,6 @@ interface Characters {
 interface Arena extends DocumentData {
     id: number
     state: C.ArenaState
-    endAt: FirebaseFirestore.Timestamp
     title: string
     scenarioUrl: string
     agreementUrl: string
@@ -25,6 +24,9 @@ interface Arena extends DocumentData {
     startText: string
     endText: string
     message: string
+    readEndAt: FirebaseFirestore.Timestamp
+    checkEndAt: FirebaseFirestore.Timestamp
+    actEndAt: FirebaseFirestore.Timestamp
     createdAt: FirebaseFirestore.Timestamp
     updatedAt: FirebaseFirestore.Timestamp
 }
@@ -34,43 +36,10 @@ class ArenaModel extends ModelBase {
         super('Arena');
     }
 
-    private getState = async (id:string) :Promise<C.ArenaState> => {
-        return this.firestore.collection('Arena').doc(id).get()
-        .then((snapshot) => {
-            const data = snapshot.data();
-            if (!data) return null;
-            return data.state;
-        })
-        .catch((err) => console.error('get arena state '+id))
-        ;
-    }
-
-    private transition2confirm = (arena:FirebaseFirestore.DocumentReference) :Promise<any> => {
-        return new Promise((resolve, reject) => {
-            setTimeout(async () => {
-                const state = await this.getState(arena.id);
-                if (!state || state !== C.ArenaState.CONFIRM) return;
-
-                const endAt = Moment().add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds').toDate();
-                arena.update({
-                    state: C.ArenaState.CHECK,
-                    endAt: admin.firestore.Timestamp.fromDate(endAt),
-                    message: '台本チェック',
-                    updatedAt: admin.firestore.Timestamp.now(),
-                })
-                .then(resolve, reject)
-                .catch(() => console.error('stateTransition update Arena'))
-                ;
-            }, C.ArenaStateTime[C.ArenaState.CONFIRM] * 1000);
-        })
-        .catch((err) => console.error('promise'))
-        ;
-    }
-
     public decideProgram = async (arenaSnapshot:FirebaseFirestore.DocumentSnapshot) => {
         const arena = arenaSnapshot.data();
         if (!arena) return;
-        if (Moment(arena.endAt.toDate()).isAfter(Moment())) return;
+        if (Moment(arena.actEndAt.toDate()).isAfter(Moment())) return;
 
         // 演者決め
         let users = await arenaSnapshot.ref.collection('RoomUser').where('state', '==', 1).get().then((snapshot) => {
@@ -132,16 +101,14 @@ class ArenaModel extends ModelBase {
                 state: C.ArenaUserState.ACTOR
             }));
         })
-        const endAt = Moment()
-            .add(C.ArenaStateTime[C.ArenaState.CONFIRM], 'seconds')
-            .add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds')
-            .add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds')
-            .toDate()
-        ;
+
+        const readEndAt = Moment().add(C.ArenaStateTime[C.ArenaState.READ], 'seconds');
+        const checkEndAt = Moment(readEndAt).add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds');
+        const actEndAt = Moment(checkEndAt).add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds');
+        
         p.push(arenaSnapshot.ref.update({
             //state: C.ArenaState.CONFIRM,
             state: C.ArenaState.WAIT, // 一旦使わない
-            endAt: admin.firestore.Timestamp.fromDate(endAt),
             title: scenario.title,
             scenarioUrl: scenario.scenarioUrl,
             agreementUrl: scenario.agreementUrl,
@@ -150,6 +117,9 @@ class ArenaModel extends ModelBase {
             startText: scenario.startText,
             endText: scenario.endText,
             message: '',
+            readEndAt: admin.firestore.Timestamp.fromDate(readEndAt.toDate()),
+            checkEndAt: admin.firestore.Timestamp.fromDate(checkEndAt.toDate()),
+            actEndAt: admin.firestore.Timestamp.fromDate(actEndAt.toDate()),
             updatedAt: admin.firestore.Timestamp.now(),
         }));
 
@@ -174,7 +144,6 @@ class ArenaModel extends ModelBase {
 
         p.push(this.ref.doc(arena.id).update({
             state: C.ArenaState.WAIT,
-            endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
             title: '',
             scenarioUrl: '',
             agreementUrl: '',
@@ -183,6 +152,9 @@ class ArenaModel extends ModelBase {
             startText: '',
             endText: '',
             message: message,
+            readEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+            checkEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+            actEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
             updatedAt: admin.firestore.Timestamp.now(),
         })
         .catch(() => { console.error('asyncTerminateAct update Arena') })
@@ -202,7 +174,6 @@ class ArenaModel extends ModelBase {
             const arena:Arena = {
                 id: i,
                 state: C.ArenaState.WAIT,
-                endAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
                 title: '',
                 scenarioUrl: '',
                 agreementUrl: '',
@@ -211,6 +182,9 @@ class ArenaModel extends ModelBase {
                 startText: '',
                 endText: '',
                 message: '',
+                readEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+                checkEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
+                actEndAt: admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate()),
                 createdAt: admin.firestore.Timestamp.now(),
                 updatedAt: admin.firestore.Timestamp.now(),
             };
