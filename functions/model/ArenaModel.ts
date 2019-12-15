@@ -196,7 +196,7 @@ class ArenaModel extends ModelBase {
                 createdAt: admin.firestore.Timestamp.now(),
                 updatedAt: admin.firestore.Timestamp.now(),
             };
-            batch.create(this.ref.doc(), arena);
+            batch.create(this.ref.doc(i.toString()), arena);
         }
         await this.commit(batch);
     }
