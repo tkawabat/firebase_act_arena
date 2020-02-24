@@ -10,6 +10,7 @@ import ConfigModel from '../model/ConfigModel';
 import UserModel from '../model/UserModel';
 import ArenaModel from '../model/ArenaModel';
 import ArenaScenarioModel from '../model/ArenaScenarioModel';
+import PushModel from '../model/PushModel';
 
 program.version('1.0.0', '-v, --version');
 program
@@ -63,6 +64,9 @@ program
         // .then(async (snapshot) => {
         //     await ArenaModel.decideProgram(snapshot);
         // });
+        PushModel.asyncSendEntry()
+            .then(() => console.log('send ok'))
+            .catch(() => console.log('send ok'))
     });
 program.parse(process.argv);
 

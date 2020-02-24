@@ -4,15 +4,33 @@
     // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        // {
+        //     "name": "scenario",
+		// 	"type": "node",
+        //     "request": "launch",
+		// 	"args": [
+        //         "${workspaceRoot}/functions/src/cli.ts",
+        //         "scenario",
+        //         "-f",
+        //         "${workspaceRoot}/functions/work/scenario.tsv"
+        //     ],
+		// 	"runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+		// 	"cwd": "${workspaceRoot}/functions",
+        //     "protocol": "inspector",
+        //     "sourceMaps": true,
+		// 	"internalConsoleOptions": "openOnSessionStart",
+		// 	"env": {
+        //         "TS_NODE_IGNORE": "false",
+        //         "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-dev-27e15-b06e4c839f79.json"
+		// 	}
+        // },
         {
-            "name": "scenario",
+            "name": "test",
 			"type": "node",
             "request": "launch",
 			"args": [
                 "${workspaceRoot}/functions/src/cli.ts",
-                "scenario",
-                "-f",
-                "${workspaceRoot}/functions/work/scenario.tsv"
+                "test"
             ],
 			"runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
 			"cwd": "${workspaceRoot}/functions",
@@ -21,8 +39,8 @@
 			"internalConsoleOptions": "openOnSessionStart",
 			"env": {
                 "TS_NODE_IGNORE": "false",
-                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-dev-612725bcba19.json"
+                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-dev-27e15-b06e4c839f79.json"
 			}
-        }
+        },
     ]
 }
