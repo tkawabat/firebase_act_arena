@@ -55,7 +55,7 @@ program
     });
 program
     .command('test')
-    .action(cmd => {
+    .action(async (cmd) => {
         //const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
         //const promise = UserModel.disconnected('a8EXylGkD3Xb1dVHZ04AnZHjfRs2');
         //promise.then(() => console.log('Command has completed')).catch(console.error);
@@ -64,9 +64,9 @@ program
         // .then(async (snapshot) => {
         //     await ArenaModel.decideProgram(snapshot);
         // });
-        PushModel.asyncSendEntry()
+        await PushModel.asyncSendEntry()
             .then(() => console.log('send ok'))
-            .catch(() => console.log('send ok'))
+            .catch(() => console.log('send error'))
     });
 program.parse(process.argv);
 
