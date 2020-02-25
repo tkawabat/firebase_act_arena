@@ -112,7 +112,7 @@ class PushModel extends ModelBase {
         // send
         const payload : Payload = {
             'title': '',
-            'body': 'hoge',
+            'body': 'アリーナでエントリーしている人がいます。',
         }
         p.push(this.asyncBatchSend(pushList, payload));
         
