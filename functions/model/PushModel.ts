@@ -1,10 +1,12 @@
 import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
-import * as Moment from 'moment';
+import * as Moment from 'moment-timezone';
+Moment.tz.setDefault('Asia/Tokyo');
 
 import * as C from '../lib/Const';
 import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
+import { ArenaRoomUser } from './ArenaRoomUser';
 
 
 interface PushData extends DocumentData {
@@ -29,10 +31,9 @@ interface Payload {
 
 class PushModel extends ModelBase {
     private nowKey: C.PushBasicSettingKey = -1;
+    
     constructor() {
         super('Push');
-
-        this.nowKey = this.getNowBasicSettingKey();
     }
 
     private getNowBasicSettingKey = () :C.PushBasicSettingKey => {
@@ -79,16 +80,42 @@ class PushModel extends ModelBase {
             
             i++;
             if (i >= this.batchSize) {
-                p.push(this.commit(batch));
+                p.push(this.commit(batch).catch(() => {
+                    console.error('PushStore.asyncBatchUpdate');
+                }));
                 i = 0;
                 batch = this.firestore.batch();
             }
         }
-        p.push(this.commit(batch))
+        p.push(this.commit(batch).catch(() => {
+            console.error('PushStore.asyncBatchUpdate');
+        }))
         return Promise.all(p);
     }
 
-    public asyncSendEntry = async () => {
+    public asyncSendEntry = async (arenaId: string, arenaRoomUsersnapshot: FirebaseFirestore.DocumentSnapshot | undefined) : Promise<any> => {
+        console.log('PushModel.asyncSendEntry start');
+        
+        const p :any[] = [];
+
+        if (arenaId !== '0') {
+            console.log('not public arena');
+            return Promise.all(p);
+        }
+
+        if (arenaRoomUsersnapshot === undefined || !arenaRoomUsersnapshot.data()) {
+            console.error('PushModel.asyncSendEntry: arenaRoomUsersnapshot null');
+            return Promise.all(p);
+        }
+        const data = arenaRoomUsersnapshot.data() as ArenaRoomUser;
+        if (data.state !== C.ArenaUserState.ENTRY) {
+            console.log('PushModel.asyncSendEntry: not entry');
+            return Promise.all(p);
+        }
+
+        // nowkeyを更新
+        this.nowKey = this.getNowBasicSettingKey();
+
         const sendLimit = admin.firestore.Timestamp.fromDate(Moment().add(-1 * C.PushIntervalHour, 'hours').toDate());
         
         const pushList = await this.ref.where('lastSendTime', '<=', sendLimit).get()
@@ -104,10 +131,11 @@ class PushModel extends ModelBase {
             ;
         
         if (!pushList || pushList.length === 0) {
-            return new Promise((resolve) => { console.log('no push target'); resolve();});
+            console.log('no push target');
+            return Promise.all(p);
         }
 
-        const p = [];
+        console.log('push target '+ pushList.length);
 
         // send
         const payload : Payload = {

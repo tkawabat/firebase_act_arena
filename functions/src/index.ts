@@ -5,9 +5,10 @@ admin.initializeApp(functions.config().firebase);
 
 import ArenaModel from '../model/ArenaModel';
 import UserModel from '../model/UserModel';
+import PushModel from '../model/PushModel';
 
 
-export const createAccountDoc = functions.runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
+export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
     const userCollection = firestore.collection('User');
     const userRef = userCollection.doc(user.uid);
@@ -25,7 +26,7 @@ export const createAccountDoc = functions.runWith({memory: '128MB', timeoutSecon
     ;
 });
 
-export const userStatusUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
+export const userStatusUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).database.ref('status/{uid}').onUpdate(async (change:functions.Change<functions.database.DataSnapshot>) => {
     const userId = change.after.key;
     const firestore = admin.firestore();
 
@@ -57,7 +58,7 @@ export const userStatusUpdated = functions.runWith({memory: '128MB', timeoutSeco
 //     await UserModel.updated(before, after, context.params.userId);
 // });
 
-export const arenaUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}').onUpdate(async (
+export const arenaUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>
     , context: functions.EventContext
 ) => {
@@ -71,16 +72,20 @@ export const arenaUpdated = functions.runWith({memory: '128MB', timeoutSeconds:1
     await Promise.all(p);
 });
 
-export const roomUserUpdated = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
+export const roomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:15}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>,
     context: functions.EventContext,
 ) => {
     console.log('ArenaId: ' + context.params.arenaId);
     console.log('UserId: ' + context.params.userId);
-    await ArenaModel.roomUserUpdated(context.params.arenaId);
+    const p = [];
+    p.push(PushModel.asyncSendEntry(context.params.arenaId, change.after));
+    p.push(ArenaModel.roomUserUpdated(context.params.arenaId));
+
+    await Promise.all(p);
 });
 
-export const roomUserDeleted = functions.runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
+export const roomUserDeleted = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
     snapshot: FirebaseFirestore.DocumentSnapshot,
     context: functions.EventContext,
 ) => {

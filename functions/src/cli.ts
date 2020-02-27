@@ -64,7 +64,7 @@ program
         // .then(async (snapshot) => {
         //     await ArenaModel.decideProgram(snapshot);
         // });
-        await PushModel.asyncSendEntry()
+        await PushModel.asyncSendEntry('0', undefined)
             .then(() => console.log('send ok'))
             .catch(() => console.log('send error'))
     });
