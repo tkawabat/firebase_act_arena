@@ -1,4 +1,7 @@
 ## functions
+* init
+    * FirebaseのWebUI上でサービスアカウントの秘密鍵を生成して、functions以下に置く
+
 * deploy
 
 ```

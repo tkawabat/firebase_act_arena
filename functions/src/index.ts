@@ -3,9 +3,9 @@ import * as functions from 'firebase-functions';
 
 admin.initializeApp(functions.config().firebase);
 
-import ArenaModel from '../model/ArenaModel';
-import UserModel from '../model/UserModel';
-import PushModel from '../model/PushModel';
+import ArenaModel from './model/ArenaModel';
+import UserModel from './model/UserModel';
+import PushModel from './model/PushModel';
 
 
 export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {

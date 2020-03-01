@@ -6,11 +6,11 @@ import * as program from 'commander';
 admin.initializeApp(functions.config().firebase);
 admin.firestore().settings({ timestampsInSnapshots: true })
 
-import ConfigModel from '../model/ConfigModel';
-import UserModel from '../model/UserModel';
-import ArenaModel from '../model/ArenaModel';
-import ArenaScenarioModel from '../model/ArenaScenarioModel';
-import PushModel from '../model/PushModel';
+import ConfigModel from './model/ConfigModel';
+import UserModel from './model/UserModel';
+import ArenaModel from './model/ArenaModel';
+import ArenaScenarioModel from './model/ArenaScenarioModel';
+import PushModel from './model/PushModel';
 
 program.version('1.0.0', '-v, --version');
 program
