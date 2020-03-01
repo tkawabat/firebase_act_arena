@@ -47,4 +47,4 @@ export const PushBasicSettingEndHour  = {
     [PushBasicSettingKey.DAWN]:     [2,9],
 }
 
-export const PushIntervalHour = 6;
+export const PushIntervalHour = 3;
