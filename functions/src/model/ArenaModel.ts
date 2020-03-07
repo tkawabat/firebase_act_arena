@@ -173,13 +173,18 @@ class ArenaModel extends ModelBase {
     }
 
     public createBatch = async (n: number) => {
-        const batch = this.firestore.batch();
+        if (n >= 1000) {
+            console.error('too many.');
+            return;
+        }
+
         const endAt = [];
         const t = admin.firestore.Timestamp.fromDate(Moment().add(-1, 'seconds').toDate());
         endAt[C.ArenaState.READ] = t;
         endAt[C.ArenaState.CHECK] = t;
         endAt[C.ArenaState.ACT] = t;
 
+        const data = [];
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
                 id: i,
@@ -196,9 +201,9 @@ class ArenaModel extends ModelBase {
                 createdAt: admin.firestore.Timestamp.now(),
                 updatedAt: admin.firestore.Timestamp.now(),
             };
-            batch.create(this.ref.doc(i.toString()), arena);
+            data.push({id: i.toString(), data: arena});
         }
-        await this.commit(batch);
+        await this.batchCreate(data);
     }
 
     public roomUserUpdated = async (arenaId:string) => {

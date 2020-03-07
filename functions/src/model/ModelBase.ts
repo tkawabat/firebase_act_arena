@@ -1,5 +1,7 @@
 import * as admin from 'firebase-admin';
 
+import * as C from '../lib/Const';
+import * as ArrayUtil from '../lib/Array';
 
 export default class ModelBase {
     protected firestore:FirebaseFirestore.Firestore;
@@ -13,7 +15,19 @@ export default class ModelBase {
 
     protected commit = async (batch:FirebaseFirestore.WriteBatch) => {
         const results = await batch.commit();
-        console.log(results);
+    }
+
+    protected batchCreate = async (data:Array<Object>) => {
+        let batch = this.firestore.batch();
+
+        const g = ArrayUtil.batchGenerator(data, this.batchSize);
+        let current = g.next();
+        while (!current.done) {
+            current.value.forEach((v) => batch.create(this.ref.doc(v.id), v.data));
+            await this.commit(batch);
+            batch = this.firestore.batch();
+            current = g.next();
+        }
     }
 
     // 削除用関数
