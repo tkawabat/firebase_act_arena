@@ -9,7 +9,7 @@ import ModelBase from './ModelBase';
 import { ArenaRoomUser } from './ArenaRoomUser';
 
 
-interface PushData extends DocumentData {
+export interface PushData extends DocumentData {
     token: string
     basicSettings: Array<C.PushBasicSettingKey>
     temporarySettingOnOff: boolean
@@ -19,7 +19,7 @@ interface PushData extends DocumentData {
     updatedAt: admin.firestore.Timestamp
 }
 
-interface Push {
+export interface Push {
     ref: admin.firestore.DocumentReference
     data: PushData
 }
@@ -71,7 +71,7 @@ class PushModel extends ModelBase {
         return admin.messaging().sendAll(messages);
     }
 
-    private asyncBatchUpdate = async (pushList:Push[]) :Promise<any> => {
+    public asyncBatchUpdate = async (pushList:Push[]) :Promise<any> => {
         const p = [];
         let i = 0;
         let batch = this.firestore.batch();
