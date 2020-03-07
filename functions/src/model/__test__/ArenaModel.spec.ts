@@ -17,7 +17,7 @@ describe('ArenaModel.createBatch', () => {
         batchSize = ArenaModel.batchSize;
     })
     beforeEach(async () => {
-        await ArenaModel.delete();
+        await ArenaModel.batchDeleteAll();
     });
 
     afterEach(async () => {

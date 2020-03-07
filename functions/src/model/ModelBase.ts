@@ -33,7 +33,7 @@ export default class ModelBase {
     }
 
     // 削除用関数
-    public delete = async () => {
+    public batchDeleteAll = async () => {
         // モックデータのみを500件ずつ取得
         const query = await this.ref
             .limit(this.batchSize)

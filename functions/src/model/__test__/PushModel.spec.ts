@@ -52,7 +52,7 @@ describe('PushModel.getNowBasicSettingKey', () => {
 
 describe('PushModel.asyncBatchUpdate', () => {
     beforeEach(async () => {
-        await PushModel.delete();
+        await PushModel.batchDeleteAll();
     });
 
     it('正常系　1件', async () => {

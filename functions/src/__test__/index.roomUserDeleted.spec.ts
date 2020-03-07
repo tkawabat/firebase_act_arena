@@ -12,7 +12,7 @@ import ArenaModel from '../model/ArenaModel';
 
 describe('index.roomUserDeleted', () => {
     beforeEach(async () => {
-        await ArenaModel.delete();
+        await ArenaModel.batchDeleteAll();
     });
     afterEach(() => {
         test().cleanup();

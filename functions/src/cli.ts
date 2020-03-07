@@ -30,7 +30,7 @@ program
             console.error('The number must be 10000 or less');
             process.exit(-1);
         }
-        const promise = cmd.delete ? UserModel.delete() : UserModel.createRondom(cmd.number)
+        const promise = cmd.delete ? UserModel.batchDeleteAll() : UserModel.createRondom(cmd.number)
         promise.then(() => console.log('Command has completed')).catch(console.error)
     });
 program
@@ -42,7 +42,7 @@ program
             console.error('The number must be 100 or less');
             process.exit(-1);
         }
-        const promise = cmd.delete ? ArenaModel.delete() : ArenaModel.createBatch(cmd.number);
+        const promise = cmd.delete ? ArenaModel.batchDeleteAll() : ArenaModel.createBatch(cmd.number);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program
@@ -50,7 +50,7 @@ program
     .option('-d, --delete', 'delete al')
     .option('-f, --file <file>', 'import tsv file')
     .action(cmd => {
-        const promise = cmd.delete ? ArenaScenarioModel.delete() : ArenaScenarioModel.importTsv(cmd.file);
+        const promise = cmd.delete ? ArenaScenarioModel.batchDeleteAll() : ArenaScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program
