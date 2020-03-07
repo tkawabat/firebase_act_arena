@@ -36,7 +36,7 @@ class PushModel extends ModelBase {
         super('Push');
     }
 
-    private getNowBasicSettingKey = () :C.PushBasicSettingKey => {
+    public getNowBasicSettingKey = () :C.PushBasicSettingKey => {
         const hour = Moment().hour();
         for (const [key, hours] of Object.entries(C.PushBasicSettingEndHour)) {
             if (hour >= hours[0] && hour < hours[1]) return parseInt(key) as C.PushBasicSettingKey;
