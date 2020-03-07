@@ -4,16 +4,45 @@ Moment.tz.setDefault('Asia/Tokyo');
 
 import * as C from '../../lib/Const';
 
-//import PushModel from '../PushModel';
+import PushModel from '../PushModel';
 
 
 describe('PushModel.getNowBasicSettingKey', () => {
-    it("null", async () => {
-        //const actual = PushModel.getNowBasicSettingKey();
-        const actual = C.PushBasicSettingKey.DAWN;
+    let realDate: () => number;
 
-        console.log('aaaaaaa');
+    beforeEach(() => {
+        realDate = Date.now;
+    })
 
-        expect(C.PushBasicSettingKey.DAWN).toBe(actual);
+    afterEach(() => {
+        global.Date.now = realDate;
+    })
+
+    it("9時", async () => {
+        global.Date.now = jest.fn(() => new Date('2020/01/02 09:00:00').getTime())
+
+        const actual = PushModel.getNowBasicSettingKey();
+        expect(actual).toBe(C.PushBasicSettingKey.MORNING);
+    });
+
+    it("15時", async () => {
+        global.Date.now = jest.fn(() => new Date('2020/01/02 15:00:00').getTime())
+
+        const actual = PushModel.getNowBasicSettingKey();
+        expect(actual).toBe(C.PushBasicSettingKey.TWILIGHT);
+    });
+
+    it("0時", async () => {
+        global.Date.now = jest.fn(() => new Date('2020/01/02 00:00:00').getTime())
+
+        const actual = PushModel.getNowBasicSettingKey();
+        expect(actual).toBe(C.PushBasicSettingKey.MIDNIGHT);
+    });
+
+    it("24時", async () => {
+        global.Date.now = jest.fn(() => new Date('2020/01/02 24:00:00').getTime())
+
+        const actual = PushModel.getNowBasicSettingKey();
+        expect(actual).toBe(C.PushBasicSettingKey.MIDNIGHT);
     });
 })
