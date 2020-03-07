@@ -11,9 +11,18 @@ import ArenaModel from '../ArenaModel';
 
 
 describe('ArenaModel.createBatch', () => {
+    let batchSize:number;
+
+    beforeAll(() => {
+        batchSize = ArenaModel.batchSize;
+    })
     beforeEach(async () => {
         await ArenaModel.delete();
     });
+
+    afterEach(async () => {
+        ArenaModel.batchSize = batchSize;
+    })
 
     it('1件', async () => {
         await ArenaModel.createBatch(1);
@@ -23,12 +32,13 @@ describe('ArenaModel.createBatch', () => {
         expect(result.docs[0].id).toBe('0');
     });
     
-    it('501件', async () => {
-        await ArenaModel.createBatch(501);
+    it('バッチサイズ超え', async () => {
+        ArenaModel.batchSize = 2;
+        await ArenaModel.createBatch(5);
 
         const result = await admin.firestore().collection('Arena').orderBy('id').get();
-        expect(result.docs.length).toBe(501);
-        expect(result.docs[500].id).toBe('500');
+        expect(result.docs.length).toBe(5);
+        expect(result.docs[4].id).toBe('4');
     });
 
     it('1000件 too many', async () => {

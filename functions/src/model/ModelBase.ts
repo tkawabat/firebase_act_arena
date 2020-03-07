@@ -5,7 +5,9 @@ import * as ArrayUtil from '../lib/Array';
 
 export default class ModelBase {
     protected firestore:FirebaseFirestore.Firestore;
-    protected batchSize = 500;
+    private _batchSize = 500;
+    get batchSize() { return this._batchSize}
+    set batchSize(s) { this._batchSize = s }
     protected ref:FirebaseFirestore.CollectionReference;
 
     constructor(collection:string) {
