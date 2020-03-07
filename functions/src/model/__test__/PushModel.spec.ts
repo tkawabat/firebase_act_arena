@@ -1,11 +1,13 @@
 import * as Moment from 'moment-timezone';
 Moment.tz.setDefault('Asia/Tokyo');
-import * as test from 'firebase-functions-test';
 import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+admin.initializeApp(functions.config().firebase);
 
 import * as C from '../../lib/Const';
 
 import PushModel, { Push, PushData } from '../PushModel';
+
 
 
 describe('PushModel.getNowBasicSettingKey', () => {
@@ -69,8 +71,7 @@ describe('PushModel.asyncBatchUpdate', () => {
         const ref1 = admin.firestore().collection('Push').doc(id1);
         await ref1.set(data1);
 
-        const snapshot1 = test().firestore.makeDocumentSnapshot(data1, '/Push/'+id1) as PushData;
-        const push1 = {ref: ref1, data: snapshot1} as Push;
+        const push1 = {ref: ref1, data: data1} as Push;
         input.push(push1);
         
         const now = Moment().second();

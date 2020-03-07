@@ -9,4 +9,3 @@ const firebaseConfig = {
     storageBucket: "act-arena-unittest.appspot.com",
 };
 const t = test(firebaseConfig, './act-arena-unittest-firebase-adminsdk-bn051-92aaff22a8.json');
-admin.initializeApp(functions.config().firebase);
