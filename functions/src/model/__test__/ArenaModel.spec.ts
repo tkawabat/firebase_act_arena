@@ -31,4 +31,9 @@ describe('ArenaModel.createBatch', () => {
         expect(result.docs[500].id).toBe('500');
     });
 
+    it('1000件 too many', async () => {
+        jest.spyOn(console, 'error');
+        await ArenaModel.createBatch(1000);
+        expect(console.error).toBeCalled();
+    });
 });
