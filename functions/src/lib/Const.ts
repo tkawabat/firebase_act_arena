@@ -1,3 +1,5 @@
+export const DefaultBatchSize = 500;
+
 export enum Gender {
     Unknown = 0
     , Male = 1

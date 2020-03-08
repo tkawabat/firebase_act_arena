@@ -9,19 +9,13 @@ import * as C from '../../lib/Const';
 import ArenaModel from '../ArenaModel';
 
 
-
 describe('ArenaModel.createBatch', () => {
-    let batchSize:number;
-
-    beforeAll(() => {
-        batchSize = ArenaModel.batchSize;
-    })
     beforeEach(async () => {
         await ArenaModel.batchDeleteAll();
     });
 
     afterEach(async () => {
-        ArenaModel.batchSize = batchSize;
+        ArenaModel.batchSize = C.DefaultBatchSize;
     })
 
     it('1件', async () => {
