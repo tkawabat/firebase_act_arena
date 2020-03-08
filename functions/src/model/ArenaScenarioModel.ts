@@ -1,9 +1,9 @@
 import * as admin from 'firebase-admin';
-import * as fs from 'fs-extra';
 import { DocumentData } from '@google-cloud/firestore';
 
 import * as C from '../lib/Const';
 import * as ArrayUtil from '../lib/Array';
+import * as FileUtil from '../lib/File';
 import ModelBase from './ModelBase';
 
 interface Characters extends DocumentData {
@@ -75,21 +75,9 @@ class ArenaScenarioModel extends ModelBase {
         }
     }
 
-    public readFile = (path: string) => {
-        let lines: Array<String> = [];
-        try {
-            const text = fs.readFileSync(path, 'utf-8');
-            lines = text.split('\r\n');
-        } catch (error) {
-            console.log(`failed to read ${error}`)
-        }
-        lines.shift();
-        return lines;        
-    }
-
     // 作成用関数
     public importTsv = async (path: string) => {
-        const lines = this.readFile(path);
+        const lines = FileUtil.readFile(path);
 
         const batch = [];
         for (const line of lines) {

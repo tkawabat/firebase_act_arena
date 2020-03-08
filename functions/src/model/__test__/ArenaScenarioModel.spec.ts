@@ -5,6 +5,7 @@ import * as functions from 'firebase-functions';
 admin.initializeApp(functions.config().firebase);
 
 import * as C from '../../lib/Const';
+import * as FileUtil from '../../lib/File';
 
 import ArenaScenarioModel, { ArenaScenario } from '../ArenaScenarioModel';
 
@@ -29,10 +30,10 @@ describe('ArenaModel.importTsv', () => {
     })
 
     it('1:1', async () => {
-        ArenaScenarioModel.readFile = jest.fn((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
             const line = defaultLine.join('\t');
             return [line];
-        });
+        })
 
         await ArenaScenarioModel.importTsv('hoge');
 
@@ -54,7 +55,7 @@ describe('ArenaModel.importTsv', () => {
     });
 
     it('1:1:1', async () => {
-        ArenaScenarioModel.readFile = jest.fn((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
             const line = defaultLine.slice();
             line[4] = '男1♂,不問1?,女1♀';
             return [line.join('\t')];
@@ -75,7 +76,7 @@ describe('ArenaModel.importTsv', () => {
     });
 
     it('バッチサイズ超え', async () => {
-        ArenaScenarioModel.readFile = jest.fn((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
             const ret = [];
             for (let i = 0; i < 5; i++) {
                 ret.push(defaultLine.join('\t'));
