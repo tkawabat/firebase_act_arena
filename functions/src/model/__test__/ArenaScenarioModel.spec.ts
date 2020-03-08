@@ -5,7 +5,7 @@ import * as functions from 'firebase-functions';
 admin.initializeApp(functions.config().firebase);
 
 import * as C from '../../lib/Const';
-import * as FileUtil from '../../lib/File';
+import * as FileUtil from '../../lib/FileUtil';
 
 import ArenaScenarioModel, { ArenaScenario } from '../ArenaScenarioModel';
 

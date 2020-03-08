@@ -1,4 +1,4 @@
-import * as ArrayUtil from '../Array';
+import * as ArrayUtil from '../ArrayUtil';
 
 describe('Array.batch', () => {
     it('正常系', () => {

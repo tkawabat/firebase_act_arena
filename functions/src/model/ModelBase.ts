@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 
 import * as C from '../lib/Const';
-import * as ArrayUtil from '../lib/Array';
+import * as ArrayUtil from '../lib/ArrayUtil';
 
 export default class ModelBase {
     protected firestore:FirebaseFirestore.Firestore;

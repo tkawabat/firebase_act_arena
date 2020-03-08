@@ -4,7 +4,7 @@ import * as Moment from 'moment-timezone';
 Moment.tz.setDefault('Asia/Tokyo');
 
 import * as C from '../lib/Const';
-import * as ArrayUtil from '../lib/Array';
+import * as ArrayUtil from '../lib/ArrayUtil';
 import ModelBase from './ModelBase';
 import { ArenaRoomUser } from './ArenaRoomUser';
 

@@ -2,8 +2,8 @@ import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
 import * as C from '../lib/Const';
-import * as ArrayUtil from '../lib/Array';
-import * as FileUtil from '../lib/File';
+import * as ArrayUtil from '../lib/ArrayUtil';
+import * as FileUtil from '../lib/FileUtil';
 import ModelBase from './ModelBase';
 
 interface Characters extends DocumentData {

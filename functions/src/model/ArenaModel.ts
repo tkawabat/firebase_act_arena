@@ -3,7 +3,7 @@ import { DocumentData } from '@google-cloud/firestore';
 import * as Moment from 'moment';
 
 import * as C from '../lib/Const';
-import * as ArrayUtil from '../lib/Array';
+import * as ArrayUtil from '../lib/ArrayUtil';
 import ModelBase from './ModelBase';
 import ArenaScenarioModel from './ArenaScenarioModel';
 
