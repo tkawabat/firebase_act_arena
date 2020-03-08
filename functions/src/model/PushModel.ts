@@ -72,25 +72,12 @@ class PushModel extends ModelBase {
     }
 
     public asyncBatchUpdate = async (pushList:Push[]) :Promise<any> => {
-        const p = [];
-        let i = 0;
-        let batch = this.firestore.batch();
+        const batch = [];
         for (const push of pushList) {
-            batch.update(push.ref, {lastSendTime: admin.firestore.Timestamp.now()})
-            
-            i++;
-            if (i >= this.batchSize) {
-                p.push(this.commit(batch).catch(() => {
-                    console.error('PushStore.asyncBatchUpdate');
-                }));
-                i = 0;
-                batch = this.firestore.batch();
-            }
+            const data = {lastSendTime: admin.firestore.Timestamp.now()};
+            batch.push({id: push.ref.id, data: data});
         }
-        p.push(this.commit(batch).catch(() => {
-            console.error('PushStore.asyncBatchUpdate');
-        }))
-        return Promise.all(p);
+        return this.asyncBatch(C.BatchType.Update, batch);
     }
 
     public asyncSendEntry = async (arenaId: string, arenaRoomUsersnapshot: FirebaseFirestore.DocumentSnapshot | undefined) : Promise<any> => {

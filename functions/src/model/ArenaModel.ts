@@ -203,7 +203,7 @@ class ArenaModel extends ModelBase {
             };
             data.push({id: i.toString(), data: arena});
         }
-        await this.batchCreate(data);
+        await this.asyncBatch(C.BatchType.CreateWithId, data);
     }
 
     public roomUserUpdated = async (arenaId:string) => {

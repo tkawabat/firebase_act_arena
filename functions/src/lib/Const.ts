@@ -1,4 +1,11 @@
 export const DefaultBatchSize = 500;
+export enum BatchType {
+    Create,
+    CreateWithId,
+    Set,
+    Update,
+    Delete
+}
 
 export enum Gender {
     Unknown = 0

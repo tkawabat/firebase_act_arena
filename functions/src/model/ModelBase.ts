@@ -19,13 +19,34 @@ export default class ModelBase {
         const results = await batch.commit();
     }
 
-    protected batchCreate = async (data:Array<Object>) => {
+    protected asyncBatch = async (type:C.BatchType, data:Array<Object>) => {
         let batch = this.firestore.batch();
 
         const g = ArrayUtil.batchGenerator(data, this.batchSize);
         let current = g.next();
         while (!current.done) {
-            current.value.forEach((v) => batch.create(this.ref.doc(v.id), v.data));
+            switch (type) {
+                case C.BatchType.Create:
+                    current.value.forEach((v) => batch.create(this.ref.doc(), v.data));
+                    break;
+                case C.BatchType.CreateWithId:
+                    current.value.forEach((v) => batch.create(this.ref.doc(v.id), v.data));
+                    break;
+                case C.BatchType.Set:
+                    //TODO
+                    console.error('not implemented');
+                    process.exit(-1);
+                    break;
+                case C.BatchType.Update:
+                    current.value.forEach((v) => batch.update(this.ref.doc(v.id), v.data));
+                    break;
+                case C.BatchType.Delete:
+                    //TODO
+                    console.error('not implemented');
+                    process.exit(-1);
+                    break;
+            }
+            
             await this.commit(batch);
             batch = this.firestore.batch();
             current = g.next();
