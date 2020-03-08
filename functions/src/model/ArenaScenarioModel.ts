@@ -2,6 +2,7 @@ import * as admin from 'firebase-admin';
 import * as fs from 'fs-extra';
 import { DocumentData } from '@google-cloud/firestore';
 
+import * as C from '../lib/Const';
 import * as ArrayUtil from '../lib/Array';
 import ModelBase from './ModelBase';
 
@@ -9,7 +10,7 @@ interface Characters extends DocumentData {
     name: string
     gender: number
 }
-interface ArenaScenario extends DocumentData {
+export interface ArenaScenario extends DocumentData {
     title: string
     scenarioUrl: string
     agreementUrl: string
@@ -74,9 +75,7 @@ class ArenaScenarioModel extends ModelBase {
         }
     }
 
-    // 作成用関数
-    public importTsv = async (path: string) => {
-
+    public readFile = (path: string) => {
         let lines: Array<String> = [];
         try {
             const text = fs.readFileSync(path, 'utf-8');
@@ -85,20 +84,19 @@ class ArenaScenarioModel extends ModelBase {
             console.log(`failed to read ${error}`)
         }
         lines.shift();
+        return lines;        
+    }
 
-        let batch = this.firestore.batch();
-        let i = 0;
+    // 作成用関数
+    public importTsv = async (path: string) => {
+        const lines = this.readFile(path);
+
+        const batch = [];
         for (const line of lines) {
             const scenario = this.parseLine(line);
-            batch.create(this.ref.doc(), scenario);
-            i++;
-            if (i >= this.batchSize) {
-                await this.commit(batch);
-                i = 0;
-                batch = this.firestore.batch();
-            }
+            batch.push({id: null, data: scenario})
         }
-        await this.commit(batch);
+        await this.asyncBatch(C.BatchType.Create, batch);
     }
 
     public getRandom = async (male: number, female: number): Promise<ArenaScenario> => {
