@@ -77,7 +77,7 @@ class ArenaScenarioModel extends ModelBase {
 
     // 作成用関数
     public importTsv = async (path: string) => {
-        const lines = FileUtil.readFile(path);
+        const lines = FileUtil.readFile(path, true);
 
         const batch = [];
         for (const line of lines) {

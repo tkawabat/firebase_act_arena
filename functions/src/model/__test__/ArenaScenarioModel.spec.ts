@@ -30,10 +30,10 @@ describe('ArenaModel.importTsv', () => {
     })
 
     it('1:1', async () => {
-        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation(() => {
             const line = defaultLine.join('\t');
             return [line];
-        })
+        });
 
         await ArenaScenarioModel.importTsv('hoge');
 
@@ -55,7 +55,7 @@ describe('ArenaModel.importTsv', () => {
     });
 
     it('1:1:1', async () => {
-        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation(() => {
             const line = defaultLine.slice();
             line[4] = '男1♂,不問1?,女1♀';
             return [line.join('\t')];
@@ -76,7 +76,7 @@ describe('ArenaModel.importTsv', () => {
     });
 
     it('バッチサイズ超え', async () => {
-        jest.spyOn(FileUtil, 'readFile').mockImplementation((path) => {
+        jest.spyOn(FileUtil, 'readFile').mockImplementation(() => {
             const ret = [];
             for (let i = 0; i < 5; i++) {
                 ret.push(defaultLine.join('\t'));
