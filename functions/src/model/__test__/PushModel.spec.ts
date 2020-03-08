@@ -51,16 +51,9 @@ describe('PushModel.getNowBasicSettingKey', () => {
 });
 
 describe('PushModel.asyncBatchUpdate', () => {
-    beforeEach(async () => {
-        await PushModel.batchDeleteAll();
-    });
-
-    it('正常系　1件', async () => {
-        const input : Push[] = [];
-        
-        const id1 = 'aaa';
-        const data1 = {
-            token: 'aaa',
+    const createPush = async (id:string) :Promise<Push> => {
+        const data = {
+            token: id,
             basicSettings: [4,5],
             temporarySettingOnOff: false,
             temporarySettingTime: admin.firestore.Timestamp.now(),
@@ -68,17 +61,49 @@ describe('PushModel.asyncBatchUpdate', () => {
             createdAt: admin.firestore.Timestamp.now(),
             updatedAt: admin.firestore.Timestamp.now(),
         } as PushData;
-        const ref1 = admin.firestore().collection('Push').doc(id1);
-        await ref1.set(data1);
+        const ref = admin.firestore().collection('Push').doc(id);
+        return await ref.set(data).then(() => {
+            return {ref: ref, data: data} as Push;
+        });
+    }
 
-        const push1 = {ref: ref1, data: data1} as Push;
-        input.push(push1);
+    beforeEach(async () => {
+        await PushModel.batchDeleteAll();
+    });
+
+    afterEach(() => {
+        PushModel.batchSize = C.DefaultBatchSize;
+    })
+
+    it('正常系　1件', async () => {
+        const input : Push[] = [];
         
+        const push = await createPush('push1');
+        input.push(push);
+
         const now = Moment().second();
 
         await PushModel.asyncBatchUpdate(input);
 
-        const result = (await ref1.get()).data() as unknown as PushData;
+        const result = (await push.ref.get()).data() as unknown as PushData;
+        expect(result.lastSendTime.seconds).toBeGreaterThan(now);
+    });
+
+    it('正常系　バッチサイズ超え', async () => {
+        PushModel.batchSize = 2;
+
+        const input : Push[] = [];
+        const p = [];
+        for (let i = 0; i < 5; i++) {
+            p.push(createPush('push'+i).then((push) => input.push(push)));
+        }
+        await Promise.all(p);
+
+        const now = Moment().second();
+
+        await PushModel.asyncBatchUpdate(input);
+
+        const result = (await input[4].ref.get()).data() as unknown as PushData;
         expect(result.lastSendTime.seconds).toBeGreaterThan(now);
     });
 });
