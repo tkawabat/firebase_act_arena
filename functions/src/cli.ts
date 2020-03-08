@@ -10,6 +10,7 @@ import ConfigModel from './model/ConfigModel';
 import UserModel from './model/UserModel';
 import ArenaModel from './model/ArenaModel';
 import ArenaScenarioModel from './model/ArenaScenarioModel';
+import ScenarioModel from './model/ScenarioModel';
 import PushModel from './model/PushModel';
 
 program.version('1.0.0', '-v, --version');
@@ -51,6 +52,14 @@ program
     .option('-f, --file <file>', 'import tsv file')
     .action(cmd => {
         const promise = cmd.delete ? ArenaScenarioModel.batchDeleteAll() : ArenaScenarioModel.importTsv(cmd.file);
+        promise.then(() => console.log('Command has completed')).catch(console.error);
+    });
+program
+    .command('scenario')
+    .option('-d, --delete', 'delete al')
+    .option('-f, --file <file>', 'import tsv file')
+    .action(cmd => {
+        const promise = cmd.delete ? ScenarioModel.batchDeleteAll() : ScenarioModel.importTsv(cmd.file);
         promise.then(() => console.log('Command has completed')).catch(console.error);
     });
 program

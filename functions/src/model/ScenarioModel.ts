@@ -10,41 +10,41 @@ interface Characters extends DocumentData {
     name: string
     gender: number
 }
-export interface ArenaScenario extends DocumentData {
+export interface Scenario extends DocumentData {
     title: string
+    author: string
     scenarioUrl: string
     agreementUrl: string
     agreementScroll: number
     characters: Array<Characters>
     genderRate: Array<string>
-    startText: string
-    endText: string
+    minutes: number
     createdAt: admin.firestore.FieldValue
     updatedAt: admin.firestore.FieldValue
 }
 
-class ArenaScenarioModel extends ModelBase {
+class ScenarioModel extends ModelBase {
     constructor() {
-        super('ArenaScenario');
+        super('Scenario');
     }
 
-    private parseLine = (line: String): ArenaScenario => {
+    private parseLine = (line: String): Scenario => {
         const l = line.split('\t');
         const characters = [];
 
         let male: number = 0;
         let female: number = 0;
         let unknown: number = 0;
-        for (const c of l[4].split(',')) {
-            let gender: C.Gender = C.Gender.Unknown;
+        for (const c of l[5].split(',')) {
+            let gender: number = 0;
             if (c.indexOf('♂') !== -1) {
-                gender = C.Gender.Male;
+                gender = 1;
                 male++;
             } else if (c.indexOf('♀') !== -1) {
-                gender = C.Gender.Female;
+                gender = 2;
                 female++;
             } else if (c.indexOf('?') !== -1) {
-                gender = C.Gender.Unknown;
+                gender = 0;
                 unknown++;
             } else {
                 console.error('unknown gender');
@@ -63,13 +63,13 @@ class ArenaScenarioModel extends ModelBase {
         }
         return {
             title: l[0]
-            , scenarioUrl: l[1]
-            , agreementUrl: l[2]
-            , agreementScroll: parseInt(l[3])
+            , author: l[1]
+            , scenarioUrl: l[2]
+            , agreementUrl: l[3]
+            , agreementScroll: parseInt(l[4])
             , characters: characters
             , genderRate: genderRate
-            , startText: l[5]
-            , endText: l[6]
+            , minutes: parseInt(l[6])
             , createdAt: admin.firestore.FieldValue.serverTimestamp()
             , updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }
@@ -87,8 +87,8 @@ class ArenaScenarioModel extends ModelBase {
         await this.asyncBatch(C.BatchType.Create, batch);
     }
 
-    public getRandom = async (male: number, female: number): Promise<ArenaScenario> => {
-        return this.ref.where('genderRate', 'array-contains', male + ':' + female)
+    public getRandom = async (male: number, female: number): Promise<Scenario> => {
+        return this.ref.where('genderRate', 'array-contains', male+':'+female)
             .limit(1000)
             .get().then((snapshot) => {
                 const scenarios = snapshot.docs.map(v => v.data());
@@ -96,6 +96,7 @@ class ArenaScenarioModel extends ModelBase {
             })
             ;
     }
+
 }
 
-export default new ArenaScenarioModel();
+export default new ScenarioModel();
