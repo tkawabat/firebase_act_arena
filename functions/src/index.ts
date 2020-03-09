@@ -6,6 +6,7 @@ admin.initializeApp(functions.config().firebase);
 import ArenaModel from './model/ArenaModel';
 import UserModel from './model/UserModel';
 import PushModel from './model/PushModel';
+import MatchingModel from './model/MatchingModel';
 
 
 export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
@@ -91,4 +92,14 @@ export const roomUserDeleted = functions.region('asia-northeast1').runWith({memo
     const data = snapshot.data();
     if (!data) return;
     await ArenaModel.roomUserDeleted(data, context.params.arenaId);
+});
+
+export const matchingCreated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Matching/{userId}').onCreate(async (
+    snapshot: FirebaseFirestore.DocumentSnapshot,
+    context: functions.EventContext,
+) => {
+    console.log('UserId: ' + context.params.userId);
+    const data = snapshot.data();
+    if (!data) return;
+    await MatchingModel.decideProgram();
 });
