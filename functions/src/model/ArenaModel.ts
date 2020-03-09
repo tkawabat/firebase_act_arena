@@ -15,7 +15,6 @@ interface Characters {
 }
 interface Arena extends DocumentData {
     id: number
-    state: C.ArenaState
     title: string
     scenarioUrl: string
     agreementUrl: string
@@ -109,8 +108,6 @@ class ArenaModel extends ModelBase {
         endAt[C.ArenaState.ACT] = t.toDate();
 
         p.push(arenaSnapshot.ref.update({
-            //state: C.ArenaState.CONFIRM,
-            state: C.ArenaState.WAIT, // 一旦使わない
             title: scenario.title,
             scenarioUrl: scenario.scenarioUrl,
             agreementUrl: scenario.agreementUrl,
@@ -149,7 +146,6 @@ class ArenaModel extends ModelBase {
         endAt[C.ArenaState.ACT] = t;
 
         p.push(this.ref.doc(arena.id).update({
-            state: C.ArenaState.WAIT,
             title: '',
             scenarioUrl: '',
             agreementUrl: '',
@@ -165,11 +161,6 @@ class ArenaModel extends ModelBase {
         );
 
         return Promise.all(p);
-    }
-
-    public stateTransition = async (before:FirebaseFirestore.DocumentData, after:FirebaseFirestore.DocumentData, arenaId:string) => {
-        const snapshot = await this.firestore.collection('Arena').doc(arenaId).get();
-        await this.decideProgram(snapshot);
     }
 
     public createBatch = async (n: number) => {
@@ -188,7 +179,6 @@ class ArenaModel extends ModelBase {
         for (let i = 0; i < n; i++) {
             const arena:Arena = {
                 id: i,
-                state: C.ArenaState.WAIT,
                 title: '',
                 scenarioUrl: '',
                 agreementUrl: '',

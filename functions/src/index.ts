@@ -58,16 +58,13 @@ export const userStatusUpdated = functions.region('asia-northeast1').runWith({me
 //     await UserModel.updated(before, after, context.params.userId);
 // });
 
-export const arenaUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}').onUpdate(async (
-    change: functions.Change<functions.firestore.DocumentSnapshot>
+export const arenaChatUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/Chat/{chatId}').onCreate(async (
+    snapshot: functions.firestore.DocumentSnapshot
     , context: functions.EventContext
 ) => {
     console.log('ArenaId: ' + context.params.arenaId);
-    const before = change.before.data() as FirebaseFirestore.DocumentData;
-    const after = change.after.data() as FirebaseFirestore.DocumentData;
 
     const p = [];
-    p.push(ArenaModel.stateTransition(before, after, context.params.arenaId));
     p.push(ArenaModel.checkAndDeleteChat(context.params.arenaId));
     await Promise.all(p);
 });
