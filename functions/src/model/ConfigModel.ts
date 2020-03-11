@@ -19,15 +19,13 @@ class ConfigModel extends ModelBase {
     
     public create = async () => {
         const id = 'config';
-        let batch = this.firestore.batch();
         const config: Config = {
             maintenance: '',
             version: '1.0.0',
             createdAt: admin.firestore.Timestamp.now(),
             updatedAt: admin.firestore.Timestamp.now(),
         }
-        batch.create(this.ref.doc(id), config);    
-        await this.commit(batch);
+        await this.ref.doc(id).set(config);
     }
 }
 
