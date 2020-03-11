@@ -223,7 +223,6 @@ class ArenaModel extends ModelBase {
 
         const p = [];
         for (let i = 0; i < n; i++) {
-            console.log('delete chat '+querySnapshot.docs[i].id);
             p.push(chat.doc(querySnapshot.docs[i].id).delete());
         }
         await Promise.all(p)
