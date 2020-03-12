@@ -6,7 +6,7 @@ import * as ArrayUtil from '../lib/ArrayUtil';
 import * as FileUtil from '../lib/FileUtil';
 import ModelBase from './ModelBase';
 
-interface Characters extends DocumentData {
+export interface Characters extends DocumentData {
     name: string
     gender: number
 }
