@@ -9,7 +9,6 @@ import * as C from '../../lib/Const';
 import PushModel, { Push, PushData } from '../PushModel';
 
 
-
 describe('PushModel.getNowBasicSettingKey', () => {
     let realDate: () => number;
 
