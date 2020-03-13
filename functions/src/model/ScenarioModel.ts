@@ -6,7 +6,7 @@ import * as ArrayUtil from '../lib/ArrayUtil';
 import * as FileUtil from '../lib/FileUtil';
 import ModelBase from './ModelBase';
 
-export interface Characters extends DocumentData {
+export interface ScenarioCharacter extends DocumentData {
     name: string
     gender: number
 }
@@ -16,7 +16,7 @@ export interface Scenario extends DocumentData {
     scenarioUrl: string
     agreementUrl: string
     agreementScroll: number
-    characters: Array<Characters>
+    characters: Array<ScenarioCharacter>
     genderRate: Array<string>
     minutes: number
     createdAt: admin.firestore.FieldValue

@@ -8,7 +8,7 @@ import * as C from '../../lib/Const';
 import * as ArrayUtil from '../../lib/ArrayUtil';
 
 import MatchingService from '../MatchingService';
-import { Characters, Scenario } from '../../model/ScenarioModel';
+import { ScenarioCharacter, Scenario } from '../../model/ScenarioModel';
 
 
 describe('MatchingService.decideUsers', () => {

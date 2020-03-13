@@ -4,6 +4,7 @@ import * as C from '../lib/Const';
 import * as ArrayUtil from '../lib/ArrayUtil';
 
 import MatchingListModel, { MatchingList } from '../model/MatchingListModel';
+import ScenarioModel, { Scenario } from '../model/ScenarioModel';
 
 class MatchingService {
 
