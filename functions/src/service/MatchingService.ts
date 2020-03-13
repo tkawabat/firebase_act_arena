@@ -5,13 +5,15 @@ import * as ArrayUtil from '../lib/ArrayUtil';
 
 import MatchingListModel, { MatchingList } from '../model/MatchingListModel';
 import ScenarioModel, { Scenario } from '../model/ScenarioModel';
+import TheaterModel, { TheaterCharacter, Theater } from '../model/TheaterModel';
+import UserModel from '../model/UserModel';
 
 class MatchingService {
 
-    public decideUsers = (users: Matching[], male:number, female: number, unkown:number) :Matching[] => {
+    public decideUsers = (users: MatchingList[], male:number, female: number, unkown:number) :MatchingList[] => {
         const ret = [];
 
-        const shuffled = ArrayUtil.shuffle(users) as Matching[];
+        const shuffled = ArrayUtil.shuffle(users) as MatchingList[];
 
         const count = {
             [C.Gender.Male]: 0,
@@ -33,7 +35,7 @@ class MatchingService {
         return ret;
     }
 
-    public decideCast = (users:Matching[], scenario: Scenario) :Characters[] => {
+    public decideCast = (users:MatchingList[], scenario: Scenario) :TheaterCharacter[] => {
         const decided = [];
         const characters = scenario.characters.map((v) => {
             return {
@@ -41,7 +43,7 @@ class MatchingService {
                 gender: v.gender,
                 user: '',
                 userName: ''
-            } as Characters;
+            } as TheaterCharacter;
         });
 
         // 不問以外を先に決める
@@ -72,10 +74,9 @@ class MatchingService {
     }
 
     public decideProgram = async () => {
-        let users = await MatchingModel.asyncGet(10);
-
+        // 演者決め
+        let users = await MatchingListModel.asyncGet(10);
         users = this.decideUsers(users, 1, 1, 0);
-
         if (users.length !== 2) {
             console.log('user miss match');
             return;
@@ -96,41 +97,17 @@ class MatchingService {
         }
 
         // 役決め
-        scenario.characters = this.decideCast(users, scenario);
+        const characters = this.decideCast(users, scenario);
         console.log(scenario);
 
-        //     const p = [];
-        //     users.forEach((user) => {
-        //         p.push(arenaSnapshot.ref.collection('RoomUser').doc(user.id).update({
-        //             state: C.ArenaUserState.ACTOR
-        //         }));
-        //     })
-
-        //     const endAt = [];
-        //     let t = Moment().add(C.ArenaStateTime[C.ArenaState.READ], 'seconds');
-        //     endAt[C.ArenaState.READ] = t.toDate();
-        //     t = Moment(t).add(C.ArenaStateTime[C.ArenaState.CHECK], 'seconds')
-        //     endAt[C.ArenaState.CHECK] = t.toDate();
-        //     t = Moment(t).add(C.ArenaStateTime[C.ArenaState.ACT], 'seconds')
-        //     endAt[C.ArenaState.ACT] = t.toDate();
-
-        //     p.push(arenaSnapshot.ref.update({
-        //         //state: C.ArenaState.CONFIRM,
-        //         state: C.ArenaState.WAIT, // 一旦使わない
-        //         title: scenario.title,
-        //         scenarioUrl: scenario.scenarioUrl,
-        //         agreementUrl: scenario.agreementUrl,
-        //         agreementScroll: scenario.agreementScroll,
-        //         characters: scenario.characters,
-        //         startText: scenario.startText,
-        //         endText: scenario.endText,
-        //         message: '',
-        //         endAt: endAt,
-        //         updatedAt: admin.firestore.Timestamp.now(),
-        //     }));
-
-        //     //p.push(this.transition2confirm(arenaSnapshot.ref));
-        //     await Promise.all(p);
+        // update model
+        const p = [];
+        const theaterId = TheaterModel.createId();
+        p.push(TheaterModel.asyncCreate(theaterId, scenario, characters));
+        users.forEach((user) => {
+            p.push(UserModel.asyncUpdateTheater(user.id, theaterId));
+        });
+        // TODO MatchingListから削除
     }
 
 }

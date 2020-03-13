@@ -11,6 +11,7 @@ export interface User extends DocumentData {
     gender: number
     iconUrl: string
     arena: string
+    theater: string
     ngList: Array<String>
     createdAt: FirebaseFirestore.FieldValue
     updatedAt: FirebaseFirestore.FieldValue
@@ -49,6 +50,7 @@ class UserModel extends ModelBase {
                 gender: gender,
                 iconUrl: '',
                 arena: '',
+                theater: '',
                 ngList: [],
                 fake: 1,
                 createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -64,6 +66,14 @@ class UserModel extends ModelBase {
         if (before.connect as boolean === true && after.connect as boolean === false) {
             return this.disconnected(after, userId);
         }
+    }
+
+    public asyncUpdateTheater = async (userId:string, theater: string) => {
+        return this.ref.doc(userId).update({
+            theater: theater
+        }).catch(() => {
+            console.error('UserModel.asyncSetTheater');
+        })
     }
 }
 

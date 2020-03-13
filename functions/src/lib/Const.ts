@@ -33,6 +33,18 @@ export enum ArenaUserState {
     , ACTOR = 2
 }
 
+export enum TheaterState {
+    READ = 0,
+    CHECK = 1,
+    ACT = 2,
+}
+
+export const TheaterStateTime = {
+    [ArenaState.READ]: 10 * 60 + 3,
+    [ArenaState.CHECK]: 5 * 60,
+    [ArenaState.ACT]: 60 * 60 + 1,
+}
+
 export const ChatMax = 30;
 
 export enum PushBasicSettingKey {
