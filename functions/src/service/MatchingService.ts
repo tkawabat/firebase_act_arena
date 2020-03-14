@@ -100,14 +100,15 @@ class MatchingService {
         const characters = this.decideCast(users, scenario);
         console.log(scenario);
 
-        // update model
+        // update data
         const p = [];
         const theaterId = TheaterModel.createId();
         p.push(TheaterModel.asyncCreate(theaterId, scenario, characters));
         users.forEach((user) => {
             p.push(UserModel.asyncUpdateTheater(user.id, theaterId));
+            p.push(MatchingListModel.asyncDeleteById(user.id));
         });
-        // TODO MatchingListから削除
+        
     }
 
 }
