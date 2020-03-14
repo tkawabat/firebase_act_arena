@@ -5,14 +5,18 @@ import * as ArrayUtil from '../lib/ArrayUtil';
 
 export default class ModelBase {
     protected firestore:FirebaseFirestore.Firestore;
+    
     private _batchSize = C.DefaultBatchSize;
-    get batchSize() { return this._batchSize}
-    set batchSize(s) { this._batchSize = s }
-    protected ref:FirebaseFirestore.CollectionReference;
+    get batchSize() { return this._batchSize; }
+    set batchSize(size) { this._batchSize = size; }
+
+    private _ref:FirebaseFirestore.CollectionReference;
+    get ref() { return this._ref; }
+    set ref(ref) { this._ref = ref; }
 
     constructor(collection:string) {
         this.firestore = admin.firestore();
-        this.ref = this.firestore.collection(collection);
+        this._ref = this.firestore.collection(collection);
     }
 
     protected commit = async (batch:FirebaseFirestore.WriteBatch) => {
@@ -27,10 +31,10 @@ export default class ModelBase {
         while (!current.done) {
             switch (type) {
                 case C.BatchType.Create:
-                    current.value.forEach((v) => batch.create(this.ref.doc(), v.data));
+                    current.value.forEach((v) => batch.create(this._ref.doc(), v.data));
                     break;
                 case C.BatchType.CreateWithId:
-                    current.value.forEach((v) => batch.create(this.ref.doc(v.id), v.data));
+                    current.value.forEach((v) => batch.create(this._ref.doc(v.id), v.data));
                     break;
                 case C.BatchType.Set:
                     //TODO
@@ -38,7 +42,7 @@ export default class ModelBase {
                     process.exit(-1);
                     break;
                 case C.BatchType.Update:
-                    current.value.forEach((v) => batch.update(this.ref.doc(v.id), v.data));
+                    current.value.forEach((v) => batch.update(this._ref.doc(v.id), v.data));
                     break;
                 case C.BatchType.Delete:
                     //TODO
@@ -53,10 +57,17 @@ export default class ModelBase {
         }
     }
 
-    // 削除用関数
+    public asyncGetById = async (id:string) => {
+        return this.ref.doc(id).get();
+    }
+
+    public asyncDeleteById = async (id :string) => {
+        return this._ref.doc(id).delete();
+    }
+
     public batchDeleteAll = async () => {
         // モックデータのみを500件ずつ取得
-        const query = await this.ref
+        const query = await this._ref
             .limit(this.batchSize)
             ;
 
