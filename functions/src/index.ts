@@ -10,7 +10,6 @@ import UserModel from './model/UserModel';
 import PushModel from './model/PushModel';
 
 
-
 export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
     const firestore = admin.firestore();
     const userCollection = firestore.collection('User');
@@ -96,7 +95,7 @@ export const roomUserDeleted = functions.region('asia-northeast1').runWith({memo
     await ArenaModel.roomUserDeleted(data, context.params.arenaId);
 });
 
-export const matchingCreated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('MatchingList/{userId}').onCreate(async (
+export const matchingListCreated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('MatchingList/{userId}').onCreate(async (
     snapshot: FirebaseFirestore.DocumentSnapshot,
     context: functions.EventContext,
 ) => {

@@ -36,10 +36,6 @@ class TheaterModel extends ModelBase {
         return this.ref.doc().id;
     }
 
-    public asyncGet = async (id:string) => {
-        return this.ref.doc(id).get();
-    }
-
     public asyncCreate = async (id:string, scenario:Scenario, characters:TheaterCharacter[]) => {
         const endAt = [];
         let t = Moment().add(C.TheaterStateTime[C.TheaterState.READ], 'seconds');

@@ -46,7 +46,7 @@ describe('TheaterModel.asyncCreate', () => {
         const checkEnd = Moment('2020-01-01 09:15:03').unix();
         const actEnd = Moment('2020-01-01 10:15:04').unix();
 
-        const data = (await TheaterModel.asyncGet(id)).data() as FirebaseFirestore.DocumentData;
+        const data = (await TheaterModel.asyncGetById(id)).data() as FirebaseFirestore.DocumentData;
         expect(data.title).toBe('title01');
         expect(data.characters.length).toBe(2);
         expect(data.characters[0].name).toBe('name01');

@@ -39,12 +39,8 @@ describe('index.roomUserDeleted', () => {
                 userId: userId,
             }
         }).then(async () => {
-            const result = (await arenaRef.get()).data();
-            if (result) {
-                expect(result.state).toBe(C.ArenaState.ACT);
-            } else {
-                throw new Error();
-            }
+            const result = (await arenaRef.get()).data() as FirebaseFirestore.DocumentData;
+            expect(result.state).toBe(C.ArenaState.ACT);
         });
     });
 
@@ -77,20 +73,12 @@ describe('index.roomUserDeleted', () => {
                 userId: userId,
             }
         }).then(async () => {
-            const arena = (await arenaRef.get()).data();
-            if (arena) {
-                expect(arena.state).toBe(C.ArenaState.WAIT);
-                expect(arena.message).toBe('演者の接続エラー\n上演を強制終了します');
-            } else {
-                throw new Error();
-            }
-
-            const remainActor = (await remainActorRef.get()).data();
-            if (remainActor) {
-                expect(remainActor.state).toBe(C.ArenaUserState.LISTNER);
-            } else {
-                throw new Error();
-            }
+            const arena = (await arenaRef.get()).data() as FirebaseFirestore.DocumentData;
+            expect(arena.state).toBe(C.ArenaState.WAIT);
+            expect(arena.message).toBe('演者の接続エラー\n上演を強制終了します');
+            
+            const remainActor = (await remainActorRef.get()).data() as FirebaseFirestore.DocumentData;
+            expect(remainActor.state).toBe(C.ArenaUserState.LISTNER);
         });
     });
 });
