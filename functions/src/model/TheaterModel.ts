@@ -21,6 +21,7 @@ export interface Theater extends DocumentData {
     agreementUrl: string
     agreementScroll: number
     characters: Array<TheaterCharacter>
+    minutes: number
     message: string
     endAt: Array<FirebaseFirestore.Timestamp>
     createdAt: FirebaseFirestore.Timestamp
@@ -52,6 +53,7 @@ class TheaterModel extends ModelBase {
             agreementUrl: scenario.agreementUrl,
             agreementScroll: scenario.agreementScroll,
             characters: characters,
+            minutes: scenario.minutes,
             message: '',
             endAt: endAt,
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
