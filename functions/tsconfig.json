@@ -5,6 +5,7 @@
     "noUnusedLocals": false,
     "outDir": "build",
     "sourceMap": true,
+    "types": ["react", "node", "jest"],
     "strict": true,
     "target": "es2017"
   },
