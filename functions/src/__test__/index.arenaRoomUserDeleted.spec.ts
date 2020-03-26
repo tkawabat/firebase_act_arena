@@ -10,7 +10,7 @@ import * as C from '../lib/Const';
 import ArenaModel from '../model/ArenaModel';
 
 
-describe('index.roomUserDeleted', () => {
+describe('index.arenaRoomUserDeleted', () => {
     beforeEach(async () => {
         await ArenaModel.batchDeleteAll();
     });
@@ -30,12 +30,12 @@ describe('index.roomUserDeleted', () => {
             state: C.ArenaUserState.ENTRY
         }
 
-        const wrapped = test().wrap(Index.roomUserDeleted);
-        const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/0/RoomUser/'+userId);
+        const wrapped = test().wrap(Index.arenaRoomUserDeleted);
+        const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/'+arenaId+'/RoomUser/'+userId);
 
         wrapped(snapshot, {
             params: {
-                arenaId: 100,
+                arenaId: arenaId,
                 userId: userId,
             }
         }).then(async () => {
@@ -64,12 +64,14 @@ describe('index.roomUserDeleted', () => {
             state: C.ArenaUserState.ACTOR
         }
 
-        const wrapped = test().wrap(Index.roomUserDeleted);
-        const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/0/RoomUser/'+userId);
+        await Promise.all(p);
+
+        const wrapped = test().wrap(Index.arenaRoomUserDeleted);
+        const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/'+arenaId+'/RoomUser/'+userId);
 
         wrapped(snapshot, {
             params: {
-                arenaId: 100,
+                arenaId: arenaId,
                 userId: userId,
             }
         }).then(async () => {
