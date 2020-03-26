@@ -37,6 +37,7 @@ export enum TheaterState {
     READ = 0,
     CHECK = 1,
     ACT = 2,
+    END = 3,
 }
 
 export const TheaterStateTime = {

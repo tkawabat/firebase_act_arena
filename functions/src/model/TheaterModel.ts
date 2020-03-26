@@ -1,4 +1,5 @@
-import * as Moment from 'moment';
+import * as Moment from 'moment-timezone';
+Moment.tz.setDefault('Asia/Tokyo');
 import admin = require('firebase-admin');
 import { DocumentData } from '@google-cloud/firestore';
 
@@ -37,6 +38,29 @@ class TheaterModel extends ModelBase {
         return this.ref.doc().id;
     }
 
+    public calcState = (theater:Theater) :C.TheaterState => {
+         // stateと残り時間の計算
+         let state:C.TheaterState = C.TheaterState.END;
+         const now = Moment().unix();
+         for (const [key, value] of theater.endAt.entries()) {
+             if (now > value.seconds) continue;
+             
+             state = key as C.TheaterState;
+             break;
+         }
+         return state;
+    }
+
+    public asyncTransitionState = (id:string, theater:Theater) => {
+        const state = this.calcState(theater);
+        if (state === C.TheaterState.END) return;
+
+        const t = Moment();
+        const endAt = theater.endAt.slice(0);
+        endAt[state] = admin.firestore.Timestamp.fromDate(t.toDate());
+        return this.ref.doc(id).update({endAt: endAt});
+    }
+
     public asyncCreate = async (id:string, scenario:Scenario, characters:TheaterCharacter[]) => {
         const endAt = [];
         let t = Moment().add(C.TheaterStateTime[C.TheaterState.READ], 'seconds');
@@ -63,6 +87,34 @@ class TheaterModel extends ModelBase {
         return this.ref.doc(id).create(theater).catch(() => {
             console.error('TheaterModel.asyncCreate');
         });
+    }
+
+    public roomUserUpdated = async (theaterId:string) => {
+        const theaterSnapshot = await this.ref.doc(theaterId).get();
+        const theater = theaterSnapshot.data() as Theater;
+
+        if (!theater) {
+            console.error('theater not found');
+            return;
+        }
+
+        const RoomUserSnapshot = await theaterSnapshot.ref.collection('RoomUser').get();
+        const nextUser:string[] = [];
+        RoomUserSnapshot.docs.forEach((v) => {
+            if (!v.data().next) return;
+            nextUser.push(v.id);
+        });
+        
+        const isAllActorNext = theater.characters.every((v) => {
+            return nextUser.indexOf(v.user) !== -1;
+        });
+
+        if (isAllActorNext) {
+            console.log('transition state');
+            return this.asyncTransitionState(theaterId, theater);
+        }
+
+        return;
     }
 
 }

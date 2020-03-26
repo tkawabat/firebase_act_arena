@@ -8,6 +8,7 @@ import MatchingService from './service/MatchingService';
 import ArenaModel from './model/ArenaModel';
 import UserModel from './model/UserModel';
 import PushModel from './model/PushModel';
+import TheaterModel from './model/TheaterModel';
 
 
 export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
@@ -71,7 +72,7 @@ export const arenaChatUpdated = functions.region('asia-northeast1').runWith({mem
     await Promise.all(p);
 });
 
-export const roomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:15}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
+export const arenaRoomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:15}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>,
     context: functions.EventContext,
 ) => {
@@ -84,7 +85,7 @@ export const roomUserUpdated = functions.region('asia-northeast1').runWith({memo
     await Promise.all(p);
 });
 
-export const roomUserDeleted = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
+export const arenaRoomUserDeleted = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('Arena/{arenaId}/RoomUser/{userId}').onDelete(async (
     snapshot: FirebaseFirestore.DocumentSnapshot,
     context: functions.EventContext,
 ) => {
@@ -103,4 +104,16 @@ export const matchingListCreated = functions.region('asia-northeast1').runWith({
     const data = snapshot.data();
     if (!data) return;
     await MatchingService.decideProgram();
+});
+
+export const theaterRoomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:15}).firestore.document('Theater/{theaterId}/RoomUser/{userId}').onUpdate(async (
+    change: functions.Change<functions.firestore.DocumentSnapshot>,
+    context: functions.EventContext,
+) => {
+    console.log('TheaterId: ' + context.params.theaterId);
+    console.log('UserId: ' + context.params.userId);
+    const p = [];
+    p.push(TheaterModel.roomUserUpdated(context.params.theaterId));
+
+    await Promise.all(p);
 });
