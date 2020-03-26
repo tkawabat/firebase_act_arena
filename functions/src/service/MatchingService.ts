@@ -108,7 +108,8 @@ class MatchingService {
             p.push(UserModel.asyncUpdateTheater(user.id, theaterId));
             p.push(MatchingListModel.asyncDeleteById(user.id));
         });
-        
+
+        return Promise.all(p);
     }
 
 }
