@@ -51,6 +51,23 @@ class TheaterModel extends ModelBase {
          return state;
     }
 
+    public asyncCheckAllActorIsNext = async (snapshot:FirebaseFirestore.DocumentSnapshot) => {
+        const theater = snapshot.data() as Theater;
+        const RoomUserSnapshot = await snapshot.ref.collection('RoomUser').get();
+
+        const state = this.calcState(theater);
+        const nextUser:string[] = [];
+        RoomUserSnapshot.docs.forEach((v) => {
+            const userState = v.data().next as C.TheaterState;
+            if (userState !== state) return;
+            nextUser.push(v.id);
+        });
+        
+        return theater.characters.every((v) => {
+            return nextUser.indexOf(v.user) !== -1;
+        });
+    }
+
     public asyncTransitionState = (id:string, theater:Theater) => {
         const state = this.calcState(theater);
         if (state === C.TheaterState.END) return;
@@ -98,16 +115,7 @@ class TheaterModel extends ModelBase {
             return;
         }
 
-        const RoomUserSnapshot = await theaterSnapshot.ref.collection('RoomUser').get();
-        const nextUser:string[] = [];
-        RoomUserSnapshot.docs.forEach((v) => {
-            if (!v.data().next) return;
-            nextUser.push(v.id);
-        });
-        
-        const isAllActorNext = theater.characters.every((v) => {
-            return nextUser.indexOf(v.user) !== -1;
-        });
+        const isAllActorNext = await this.asyncCheckAllActorIsNext(theaterSnapshot);
 
         if (isAllActorNext) {
             console.log('transition state');

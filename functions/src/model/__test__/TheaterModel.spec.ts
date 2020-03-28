@@ -12,6 +12,10 @@ import { Scenario, ScenarioCharacter } from '../ScenarioModel';
 
 
 const defaultTheater = {
+    characters: [
+        {name: 'hoge', gender: C.Gender.Male, user: 'user01', userName: 'hoge'},
+        {name: 'hoge', gender: C.Gender.Female, user: 'user02', userName: 'hoge'},
+    ],
     endAt: [
         admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:01').toDate()),
@@ -44,6 +48,112 @@ describe('TheaterModel.calcState', () => {
         const actual = TheaterModel.calcState(defaultTheater);
         expect(actual).toBe(C.TheaterState.END);
     });
+});
+
+describe('TheaterModel.asyncCheckAllActorIsNext', () => {
+
+    beforeAll(async () => {
+        await TheaterModel.batchDeleteAll();
+    });
+
+    afterEach(() => {
+        TheaterModel.batchSize = C.DefaultBatchSize;
+    });
+
+    it('true', async () => {
+        TheaterModel.calcState = jest.fn(() => C.TheaterState.CHECK);
+
+        const p = [];
+        const id = 'asyncCheckAllActorIsNext01';
+        const theaterRef = TheaterModel.ref.doc(id);
+
+        p.push(theaterRef.set(defaultTheater));
+        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: C.TheaterState.CHECK}));
+        p.push(theaterRef.collection('RoomUser').doc('user02').set({ next: C.TheaterState.CHECK}));
+
+        await Promise.all(p);
+
+        const snapshot = await TheaterModel.asyncGetById(id);
+        const actual = await TheaterModel.asyncCheckAllActorIsNext(snapshot);
+
+        expect(actual).toBe(true);
+    });
+
+    it('false 演者がいない', async () => {
+        TheaterModel.calcState = jest.fn(() => C.TheaterState.CHECK);
+
+        const p = [];
+        const id = 'asyncCheckAllActorIsNext02';
+        const theaterRef = TheaterModel.ref.doc(id);
+
+        p.push(theaterRef.set(defaultTheater));
+        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: C.TheaterState.CHECK}));
+
+        await Promise.all(p);
+
+        const snapshot = await TheaterModel.asyncGetById(id);
+        const actual = await TheaterModel.asyncCheckAllActorIsNext(snapshot);
+
+        expect(actual).toBe(false);
+    });
+
+    it('false 1人state違い', async () => {
+        TheaterModel.calcState = jest.fn(() => C.TheaterState.CHECK);
+
+        const p = [];
+        const id = 'asyncCheckAllActorIsNext03';
+        const theaterRef = TheaterModel.ref.doc(id);
+
+        p.push(theaterRef.set(defaultTheater));
+        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: C.TheaterState.CHECK}));
+        p.push(theaterRef.collection('RoomUser').doc('user02').set({ next: C.TheaterState.ACT}));
+
+        await Promise.all(p);
+
+        const snapshot = await TheaterModel.asyncGetById(id);
+        const actual = await TheaterModel.asyncCheckAllActorIsNext(snapshot);
+
+        expect(actual).toBe(false);
+    });
+
+    it('false 演者じゃない', async () => {
+        TheaterModel.calcState = jest.fn(() => C.TheaterState.CHECK);
+
+        const p = [];
+        const id = 'asyncCheckAllActorIsNext04';
+        const theaterRef = TheaterModel.ref.doc(id);
+
+        p.push(theaterRef.set(defaultTheater));
+        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: C.TheaterState.CHECK}));
+        p.push(theaterRef.collection('RoomUser').doc('user03').set({ next: C.TheaterState.CHECK}));
+
+        await Promise.all(p);
+
+        const snapshot = await TheaterModel.asyncGetById(id);
+        const actual = await TheaterModel.asyncCheckAllActorIsNext(snapshot);
+
+        expect(actual).toBe(false);
+    });
+
+    it('false nextがない', async () => {
+        TheaterModel.calcState = jest.fn(() => C.TheaterState.CHECK);
+
+        const p = [];
+        const id = 'asyncCheckAllActorIsNext04';
+        const theaterRef = TheaterModel.ref.doc(id);
+
+        p.push(theaterRef.set(defaultTheater));
+        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: C.TheaterState.CHECK}));
+        p.push(theaterRef.collection('RoomUser').doc('user02').set({}));
+
+        await Promise.all(p);
+
+        const snapshot = await TheaterModel.asyncGetById(id);
+        const actual = await TheaterModel.asyncCheckAllActorIsNext(snapshot);
+
+        expect(actual).toBe(false);
+    });
+
 });
 
 describe('TheaterModel.asyncTransactionState', () => {

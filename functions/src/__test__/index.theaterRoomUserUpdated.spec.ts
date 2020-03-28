@@ -7,14 +7,10 @@ import * as Index from '../index';
 
 import * as C from '../lib/Const';
 
-import TheaterModel, { TheaterCharacter, Theater } from '../model/theaterModel';
+import TheaterModel, { Theater } from '../model/theaterModel';
 
 
 const defaultTheater = {
-    characters: [
-        {name: 'hoge', gender: C.Gender.Male, user: 'user01', userName: 'hoge'},
-        {name: 'hoge', gender: C.Gender.Female, user: 'user02', userName: 'hoge'},
-    ],
     endAt: [
         admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:01').toDate()),
@@ -33,15 +29,14 @@ describe('index.theaterRoomUserUpdated', () => {
     it('更新される', async () => {
         global.Date.now = jest.fn(() => new Date('2020-01-01 09:00:03').getTime());
         TheaterModel.calcState = jest.fn(() => C.TheaterState.READ);
+        TheaterModel.asyncCheckAllActorIsNext = jest.fn().mockResolvedValue(true);
 
         const p = [];
 
-        const theaterId = '100';
+        const theaterId = 'theaterRoomUserUpdated01';
         const theaterRef = TheaterModel.ref.doc(theaterId);
         
         p.push(theaterRef.set(defaultTheater));
-        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: true}));
-        p.push(theaterRef.collection('RoomUser').doc('user02').set({ next: true}));
         
         await Promise.all(p);
 
@@ -65,19 +60,14 @@ describe('index.theaterRoomUserUpdated', () => {
     it('1人だけnext 更新されない', async () => {
         global.Date.now = jest.fn(() => new Date('2020-01-01 09:00:03').getTime());
         TheaterModel.calcState = jest.fn(() => C.TheaterState.READ);
+        TheaterModel.asyncCheckAllActorIsNext = jest.fn().mockResolvedValue(true);
 
         const p = [];
-
-        const characters = new Array<TheaterCharacter>();
-        characters.push({name: 'hoge', gender: C.Gender.Male, user: 'user01', userName: 'hoge'});
-        characters.push({name: 'hoge', gender: C.Gender.Female, user: 'user02', userName: 'hoge'});
         
-        const theaterId = '101';
+        const theaterId = 'theaterRoomUserUpdated02';
         const theaterRef = TheaterModel.ref.doc(theaterId);
         
         p.push(theaterRef.set(defaultTheater));
-        p.push(theaterRef.collection('RoomUser').doc('user01').set({ next: true}));
-        p.push(theaterRef.collection('RoomUser').doc('user02').set({ next: false}));
         
         await Promise.all(p);
 
