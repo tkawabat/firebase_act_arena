@@ -24,6 +24,26 @@
 			}
         },
         {
+            "name": "arenaScenario",
+			"type": "node",
+            "request": "launch",
+			"args": [
+                "${workspaceRoot}/functions/src/cli.ts",
+                "arenaScenario",
+                "-f",
+                "${workspaceRoot}/functions/work/arenaScenario.tsv"
+            ],
+			"runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
+			"cwd": "${workspaceRoot}/functions",
+            "protocol": "inspector",
+            "sourceMaps": true,
+			"internalConsoleOptions": "openOnSessionStart",
+			"env": {
+                "TS_NODE_IGNORE": "false",
+                "GOOGLE_APPLICATION_CREDENTIALS": "${workspaceRoot}/functions/act-arena-dev-27e15-b06e4c839f79.json"
+			}
+        },
+        {
             "name": "scenario",
 			"type": "node",
             "request": "launch",

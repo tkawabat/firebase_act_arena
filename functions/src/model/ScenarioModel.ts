@@ -28,9 +28,14 @@ class ScenarioModel extends ModelBase {
         super('Scenario');
     }
 
-    private parseLine = (line: String): Scenario => {
+    private parseLine = (line: String): Scenario|undefined => {
         const l = line.split('\t');
         const characters = [];
+
+        if (l.length < 7) {
+            console.log('skip line:', line);
+            return;
+        }
 
         let male: number = 0;
         let female: number = 0;
@@ -82,6 +87,7 @@ class ScenarioModel extends ModelBase {
         const batch = [];
         for (const line of lines) {
             const scenario = this.parseLine(line);
+            if (!scenario) continue;
             batch.push({id: null, data: scenario})
         }
         await this.asyncBatch(C.BatchType.Create, batch);
