@@ -9,6 +9,7 @@ import * as ArrayUtil from '../../lib/ArrayUtil';
 
 import MatchingService from '../MatchingService';
 import { ScenarioCharacter, Scenario } from '../../model/ScenarioModel';
+import { MatchingList } from '../../model/MatchingListModel';
 
 
 describe('MatchingService.decideUsers', () => {
@@ -75,8 +76,8 @@ describe('MatchingService.decideCasting', () => {
 
     it('性別ごとに正しく配役', () => {
         const users = [
-            { id: 'id01', name: 'hoge', gender: C.Gender.Male },
-            { id: 'id02', name: 'hoge', gender: C.Gender.Female },
+            { id: 'id01', name: 'hoge', gender: C.Gender.Male } as MatchingList,
+            { id: 'id02', name: 'hoge', gender: C.Gender.Female } as MatchingList,
         ];
         const characaters =  [
             {name: 'a', gender: C.Gender.Female},
@@ -93,9 +94,9 @@ describe('MatchingService.decideCasting', () => {
 
     it('不問はあとで決める', () => {
         const users = [
-            { id: 'id01', name: 'hoge', gender: C.Gender.Male },
-            { id: 'id02', name: 'hoge', gender: C.Gender.Female },
-            { id: 'id03', name: 'hoge', gender: C.Gender.Female },
+            { id: 'id01', name: 'hoge', gender: C.Gender.Male } as MatchingList,
+            { id: 'id02', name: 'hoge', gender: C.Gender.Female } as MatchingList,
+            { id: 'id03', name: 'hoge', gender: C.Gender.Female } as MatchingList,
         ];
         const characaters =  [
             {name: 'a', gender: C.Gender.Unknown},
