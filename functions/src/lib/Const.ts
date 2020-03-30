@@ -70,4 +70,5 @@ export const PushBasicSettingEndHour  = {
     [PushBasicSettingKey.DAWN]:     [2,9],
 }
 
+export const MatchingTime = 30 * 60; // 30minutes
 export const PushIntervalHour = 3;

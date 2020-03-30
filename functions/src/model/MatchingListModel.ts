@@ -1,4 +1,5 @@
 import * as Moment from 'moment';
+import * as admin from 'firebase-admin';
 import { DocumentData } from '@google-cloud/firestore';
 
 import * as C from '../lib/Const';
@@ -10,6 +11,7 @@ export interface MatchingList {
     id: string;
     name: string;
     gender: C.Gender;
+    createdAt: FirebaseFirestore.Timestamp;
 }
 
 class MatchingListModel extends ModelBase {
@@ -17,17 +19,24 @@ class MatchingListModel extends ModelBase {
         super('MatchingList');
     }
 
-    public asyncGet = async (limit:number) => {
-        return this.ref.limit(limit).get().then((snapshot) => {
-            return snapshot.docs.map((value) => {
-                const data = value.data();
-                return {
-                    id: value.id,
-                    name: data.name,
-                    gender: data.gender
-                } as MatchingList;
-            })
-        });
+    public asyncGetWithTimelimit = async (limit:number) :Promise<MatchingList[]> => {
+        const timeLimit = admin.firestore.Timestamp.fromDate(Moment().add(-1 * C.MatchingTime, 'seconds').toDate());
+
+        return this.ref
+            .where('createdAt', '>=', timeLimit)
+            .orderBy('createdAt')
+            .limit(limit)
+            .get().then((snapshot) => {
+                return snapshot.docs.map((value) => {
+                    const data = value.data();
+                    return {
+                        id: value.id,
+                        name: data.name,
+                        gender: data.gender,
+                        createdAt: data.createdAt,
+                    };
+                })
+            });
     }
 
 }

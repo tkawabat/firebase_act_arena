@@ -16,7 +16,6 @@ import UserModel from '../model/UserModel';
 describe('index.matchingListCreated', () => {
     beforeEach(async () => {
         const p = [];
-        p.push(MatchingListModel.batchDeleteAll());
         p.push(ScenarioModel.batchDeleteAll());
         p.push(TheaterModel.batchDeleteAll());
         p.push(UserModel.batchDeleteAll());
@@ -29,6 +28,10 @@ describe('index.matchingListCreated', () => {
     it('1:1マッチング', async () => {
         const theaterId = 'theater01';
         TheaterModel.createId = jest.fn(() => theaterId);
+        MatchingListModel.asyncGetWithTimelimit = jest.fn().mockResolvedValue([
+            { name: 'username01', gender: C.Gender.Male },
+            { name: 'username02', gender: C.Gender.Female },
+        ]);
 
         const p = [];
 
@@ -38,14 +41,6 @@ describe('index.matchingListCreated', () => {
             gender: C.Gender.Male
         }));
         p.push(UserModel.ref.doc(userIds[1]).set({
-            name: 'username02',
-            gender: C.Gender.Female
-        }));
-        p.push(MatchingListModel.ref.doc(userIds[0]).set({
-            name: 'username01',
-            gender: C.Gender.Male
-        }));
-        p.push(MatchingListModel.ref.doc(userIds[1]).set({
             name: 'username02',
             gender: C.Gender.Female
         }));
@@ -86,8 +81,8 @@ describe('index.matchingListCreated', () => {
             const user = (await UserModel.asyncGetById(userIds[0])).data() as FirebaseFirestore.DocumentData;
             expect(user.theater).toBe(theaterId);
 
-            const matchingList = (await MatchingListModel.asyncGet(10));
-            expect(matchingList.length).toBe(0);
+            const matchingList = (await MatchingListModel.ref.get());
+            expect(matchingList.docs.length).toBe(0);
         });
     });
 });

@@ -75,7 +75,7 @@ class MatchingService {
 
     public decideProgram = async () => {
         // 演者決め
-        let users = await MatchingListModel.asyncGet(10);
+        let users = await MatchingListModel.asyncGetWithTimelimit(10);
         users = this.decideUsers(users, 1, 1, 0);
         if (users.length !== 2) {
             console.log('user miss match');
