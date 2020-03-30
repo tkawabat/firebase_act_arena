@@ -24,6 +24,14 @@ class UserModel extends ModelBase {
 
     public disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<any> => {
         const p = [];
+
+        // matching
+        p.push(this.firestore.collection('MatchingList').doc(userId).delete()
+            .catch(() => {
+                console.error('Matching delete');
+            }));
+
+        // arena
         if (documentData.arena && documentData.arena !== '') {
             p.push(this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
             .then(() => console.log('ArenaRoomUser delete'))
@@ -31,6 +39,8 @@ class UserModel extends ModelBase {
                 console.error('ArenaRoomUser delete');
             }));
         }
+
+        // theater
         if (documentData.theater && documentData.theater !== '') {
             p.push(this.firestore.collection('Theater').doc(documentData.theater).collection('RoomUser').doc(userId).delete()
             .then(() => console.log('TheaterRoomUser delete'))
