@@ -22,18 +22,24 @@ class UserModel extends ModelBase {
         super('User');
     }
 
-    public disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<void> => {
-        if (!documentData.arena || documentData.arena === '') {
-            console.error('no arena in user ' + userId);
-            return;
+    public disconnected = async (documentData:FirebaseFirestore.DocumentData, userId:string) :Promise<any> => {
+        const p = [];
+        if (documentData.arena && documentData.arena !== '') {
+            p.push(this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
+            .then(() => console.log('ArenaRoomUser delete'))
+            .catch(() => {
+                console.error('ArenaRoomUser delete');
+            }));
+        }
+        if (documentData.theater && documentData.theater !== '') {
+            p.push(this.firestore.collection('Theater').doc(documentData.theater).collection('RoomUser').doc(userId).delete()
+            .then(() => console.log('TheaterRoomUser delete'))
+            .catch(() => {
+                console.error('TheaterRoomUser delete');
+            }));
         }
 
-        return this.firestore.collection('Arena').doc(documentData.arena).collection('RoomUser').doc(userId).delete()
-            .then(() => console.log('RoomUser deleted'))
-            .catch(() => {
-                console.error('roomUser delete error');
-            })
-        ;
+        return Promise.all(p);
     }
     
     public createRondom = async (n: number) => {
