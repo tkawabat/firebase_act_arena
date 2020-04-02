@@ -80,31 +80,11 @@ class PushModel extends ModelBase {
         return this.asyncBatch(C.BatchType.Update, batch);
     }
 
-    public asyncSendEntry = async (arenaId: string, arenaRoomUsersnapshot: FirebaseFirestore.DocumentSnapshot | undefined) : Promise<any> => {
-        console.log('PushModel.asyncSendEntry start');
-        
-        const p :any[] = [];
-
-        if (arenaId !== '0') {
-            console.log('not public arena');
-            return Promise.all(p);
-        }
-
-        if (arenaRoomUsersnapshot === undefined || !arenaRoomUsersnapshot.data()) {
-            console.error('PushModel.asyncSendEntry: arenaRoomUsersnapshot null');
-            return Promise.all(p);
-        }
-        const data = arenaRoomUsersnapshot.data() as ArenaRoomUser;
-        if (data.state !== C.ArenaUserState.ENTRY) {
-            console.log('PushModel.asyncSendEntry: not entry');
-            return Promise.all(p);
-        }
-
+    public asyncSend = async (title:string, body:string) :Promise<any> => {
         // nowkeyを更新
         this.nowKey = this.getNowBasicSettingKey();
-
         const sendLimit = admin.firestore.Timestamp.fromDate(Moment().add(-1 * C.PushIntervalHour, 'hours').toDate());
-        
+
         const pushList = await this.ref.where('lastSendTime', '<=', sendLimit).get()
             .then((snapshot) => {
                 const ret = snapshot.docs.map((v) => { return {ref: v.ref, data: v.data() as PushData} as Push })
@@ -119,15 +99,16 @@ class PushModel extends ModelBase {
         
         if (!pushList || pushList.length === 0) {
             console.log('no push target');
-            return Promise.all(p);
+            return new Promise(() => null);
         }
 
         console.log('push target '+ pushList.length);
+        const p = [];
 
         // send
         const payload : Payload = {
-            'title': '',
-            'body': 'アリーナでエントリーしている人がいます。',
+            'title': title,
+            'body': body,
         }
         p.push(this.asyncBatchSend(pushList, payload));
         

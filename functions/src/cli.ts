@@ -11,7 +11,7 @@ import UserModel from './model/UserModel';
 import ArenaModel from './model/ArenaModel';
 import ArenaScenarioModel from './model/ArenaScenarioModel';
 import ScenarioModel from './model/ScenarioModel';
-import PushModel from './model/PushModel';
+import ArenaService from './service/ArenaService';
 
 program.version('1.0.0', '-v, --version');
 program
@@ -73,7 +73,7 @@ program
         // .then(async (snapshot) => {
         //     await ArenaModel.decideProgram(snapshot);
         // });
-        await PushModel.asyncSendEntry('0', undefined)
+        await ArenaService.asyncSendEntry('0', undefined)
             .then(() => console.log('send ok'))
             .catch(() => console.log('send error'))
     });

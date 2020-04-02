@@ -3,12 +3,13 @@ import * as functions from 'firebase-functions';
 
 admin.initializeApp(functions.config().firebase);
 
+import ArenaService from './service/ArenaService';
 import MatchingService from './service/MatchingService';
 
 import ArenaModel from './model/ArenaModel';
 import UserModel from './model/UserModel';
-import PushModel from './model/PushModel';
 import TheaterModel from './model/TheaterModel';
+import PushModel from './model/PushModel';
 
 
 export const createAccountDoc = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).auth.user().onCreate(async (user) => {
@@ -79,7 +80,7 @@ export const arenaRoomUserUpdated = functions.region('asia-northeast1').runWith(
     console.log('ArenaId: ' + context.params.arenaId);
     console.log('UserId: ' + context.params.userId);
     const p = [];
-    p.push(PushModel.asyncSendEntry(context.params.arenaId, change.after));
+    p.push(ArenaService.asyncSendEntry(context.params.arenaId, change.after));
     p.push(ArenaModel.roomUserUpdated(context.params.arenaId));
 
     await Promise.all(p);
@@ -96,17 +97,21 @@ export const arenaRoomUserDeleted = functions.region('asia-northeast1').runWith(
     await ArenaModel.roomUserDeleted(data, context.params.arenaId);
 });
 
-export const matchingListCreated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:10}).firestore.document('MatchingList/{userId}').onCreate(async (
+export const matchingListCreated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:30}).firestore.document('MatchingList/{userId}').onCreate(async (
     snapshot: FirebaseFirestore.DocumentSnapshot,
     context: functions.EventContext,
 ) => {
     console.log('UserId: ' + context.params.userId);
     const data = snapshot.data();
     if (!data) return;
-    await MatchingService.decideProgram();
+
+    const p = [];
+    p.push(PushModel.asyncSend('', 'サシ劇マッチングでエントリーしている方がいます。\n劇をしたい方は是非エントリーを！'));
+    p.push(MatchingService.decideProgram());
+    await Promise.all(p);
 });
 
-export const theaterRoomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:15}).firestore.document('Theater/{theaterId}/RoomUser/{userId}').onUpdate(async (
+export const theaterRoomUserUpdated = functions.region('asia-northeast1').runWith({memory: '128MB', timeoutSeconds:30}).firestore.document('Theater/{theaterId}/RoomUser/{userId}').onUpdate(async (
     change: functions.Change<functions.firestore.DocumentSnapshot>,
     context: functions.EventContext,
 ) => {

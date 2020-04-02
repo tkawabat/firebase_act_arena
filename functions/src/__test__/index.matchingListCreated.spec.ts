@@ -11,6 +11,7 @@ import MatchingListModel from '../model/MatchingListModel';
 import ScenarioModel, { Scenario } from '../model/ScenarioModel';
 import TheaterModel from '../model/TheaterModel';
 import UserModel from '../model/UserModel';
+import PushModel from '../model/PushModel';
 
 
 describe('index.matchingListCreated', () => {
@@ -32,6 +33,8 @@ describe('index.matchingListCreated', () => {
             { name: 'username01', gender: C.Gender.Male },
             { name: 'username02', gender: C.Gender.Female },
         ]);
+        const pushMock = jest.fn();
+        PushModel.asyncSend = pushMock;
 
         const p = [];
 
@@ -83,6 +86,8 @@ describe('index.matchingListCreated', () => {
 
             const matchingList = (await MatchingListModel.ref.get());
             expect(matchingList.docs.length).toBe(0);
+
+            expect(pushMock.mock.calls).toBe(1);
         });
     });
 });
