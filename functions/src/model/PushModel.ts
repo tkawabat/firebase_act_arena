@@ -65,13 +65,20 @@ class PushModel extends ModelBase {
     }
 
     private asyncBatchSend = async (pushList:Push[], payload:Payload) :Promise<any> => {
-        const messages = pushList.map((v) => {return {'notification': payload, 'token': v.data.token};})
+        const p = [];
+        const g = ArrayUtil.batchGenerator(pushList, 99);
 
-        // TODO limit 500
-        return admin.messaging().sendAll(messages);
+        let list = g.next();
+        while (!list.done) {
+            const messages = pushList.map((v) => {return {'notification': payload, 'token': v.data.token};})
+            p.push(admin.messaging().sendAll(messages));
+            list = g.next();
+        }
+
+        return Promise.all(p);
     }
 
-    public asyncBatchUpdate = async (pushList:Push[]) :Promise<any> => {
+    public asyncBatchUpdate = async (pushList:Push[]) => {
         const batch = [];
         for (const push of pushList) {
             const data = {lastSendTime: admin.firestore.Timestamp.now()};
@@ -93,13 +100,12 @@ class PushModel extends ModelBase {
             })
             .catch((error) => {
                 console.error('get pushList');
-                console.error(error);
             })
             ;
         
         if (!pushList || pushList.length === 0) {
             console.log('no push target');
-            return new Promise(() => null);
+            return;
         }
 
         console.log('push target '+ pushList.length);
