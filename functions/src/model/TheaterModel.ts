@@ -72,7 +72,7 @@ class TheaterModel extends ModelBase {
         const state = this.calcState(theater);
         if (state === C.TheaterState.END) return;
 
-        const t = Moment();
+        const t = Moment().add(8, 'seconds');
         const endAt = theater.endAt.slice(0);
         endAt[state] = admin.firestore.Timestamp.fromDate(t.toDate());
         return this.ref.doc(id).update({endAt: endAt});
