@@ -124,6 +124,37 @@ class PushModel extends ModelBase {
         return Promise.all(p);
     }
 
+    public asyncSendById = async (title:string, body:string, userId:string) :Promise<any> => {
+        // nowkeyを更新
+        this.nowKey = this.getNowBasicSettingKey();
+        const sendLimit = admin.firestore.Timestamp.fromDate(Moment().add(-1 * C.PushIntervalHour, 'hours').toDate());
+
+        const push = await this.ref.doc(userId).get()
+            .then((snapshot) => {
+                return { ref: snapshot.ref, data: snapshot.data() as PushData } as Push;
+            })
+            ;
+        
+        if (!push) {
+            console.log('no push target');
+            return;
+        }
+
+        // send
+        const payload : Payload = {
+            'title': title,
+            'body': body,
+        }
+
+        const p = [];
+        //send
+        p.push(this.asyncBatchSend([push], payload));
+        // update
+        p.push(this.asyncBatchUpdate([push]));
+
+        return Promise.all(p);
+    }
+
 }
 
 export default new PushModel();

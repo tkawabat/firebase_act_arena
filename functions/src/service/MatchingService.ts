@@ -7,6 +7,7 @@ import MatchingListModel, { MatchingList } from '../model/MatchingListModel';
 import ScenarioModel, { Scenario } from '../model/ScenarioModel';
 import TheaterModel, { TheaterCharacter, Theater } from '../model/TheaterModel';
 import UserModel from '../model/UserModel';
+import PushModel from '../model/PushModel';
 
 class MatchingService {
 
@@ -107,6 +108,7 @@ class MatchingService {
         users.forEach((user) => {
             p.push(UserModel.asyncUpdateTheater(user.id, theaterId));
             p.push(MatchingListModel.asyncDeleteById(user.id));
+            p.push(PushModel.asyncSendById('','サシ劇でマッチングしました！', user.id))
         });
 
         return Promise.all(p);
