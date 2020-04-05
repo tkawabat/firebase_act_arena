@@ -26,10 +26,11 @@ class UserModel extends ModelBase {
         const p = [];
 
         // matching
-        p.push(this.firestore.collection('MatchingList').doc(userId).delete()
-            .catch(() => {
-                console.error('Matching delete');
-            }));
+        // TODO iosのバックグラウンドでアプリが切れるバグが終わるまで消す
+        // p.push(this.firestore.collection('MatchingList').doc(userId).delete()
+        //     .catch(() => {
+        //         console.error('Matching delete');
+        //     }));
 
         // arena
         if (documentData.arena && documentData.arena !== '') {
