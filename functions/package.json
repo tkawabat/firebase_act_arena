@@ -28,7 +28,9 @@
     "testMatch": [
       "**/__test__/*.spec.+(ts|tsx|js)"
     ],
-    "setupFilesAfterEnv": ["<rootDir>/src/__test__/init.ts"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/__test__/init.ts"
+    ]
   },
   "engines": {
     "node": "8"
