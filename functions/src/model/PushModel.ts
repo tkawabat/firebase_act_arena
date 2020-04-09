@@ -70,7 +70,7 @@ class PushModel extends ModelBase {
 
         let list = g.next();
         while (!list.done) {
-            const messages = pushList.map((v) => {return {'notification': payload, 'token': v.data.token};})
+            const messages = list.value.map((v) => {return {'notification': payload, 'token': v.data.token};})
             p.push(admin.messaging().sendAll(messages));
             list = g.next();
         }
