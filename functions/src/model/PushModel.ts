@@ -81,7 +81,10 @@ class PushModel extends ModelBase {
     public asyncBatchUpdate = async (pushList:Push[]) => {
         const batch = [];
         for (const push of pushList) {
-            const data = {lastSendTime: admin.firestore.Timestamp.now()};
+            const data = {
+                lastSendTime: admin.firestore.Timestamp.now(),
+                updatedAt: admin.firestore.Timestamp.now(),
+            };
             batch.push({id: push.ref.id, data: data});
         }
         return this.asyncBatch(C.BatchType.Update, batch);

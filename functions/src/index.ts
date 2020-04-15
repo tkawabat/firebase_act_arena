@@ -36,7 +36,8 @@ export const userStatusUpdated = functions.region('asia-northeast1').runWith({me
 
     // update user connect
     await firestore.collection('User').doc(userId).update({
-        connect: change.after.val().state as number === 1
+        connect: change.after.val().state as number === 1,
+        updatedAt: admin.firestore.Timestamp.now(),
     })
     .catch((err) => console.error('update User connect'))
     ;
