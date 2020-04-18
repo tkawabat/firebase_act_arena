@@ -71,4 +71,4 @@ export const PushBasicSettingEndHour  = {
 }
 
 export const MatchingTime = 30 * 60; // 30minutes
-export const PushIntervalHour = 3;
+export const PushIntervalHour = 1;
