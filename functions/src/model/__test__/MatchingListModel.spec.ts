@@ -31,7 +31,7 @@ describe('MatchingListModel.asyncGetWithTimelimit', () => {
         const actual = await MatchingListModel.asyncGetWithTimelimit(1);
 
         expect(actual.length).toBe(1);
-        expect(actual[0].id).toBe('user02');
+        expect(actual[0].id).toBe('user03');
     });
     
     it('時間切れ', async () => {

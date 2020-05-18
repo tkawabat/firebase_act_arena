@@ -37,7 +37,7 @@ describe('MatchingService.calcConstraint', () => {
 
     it('正常系', () => {
         const actual = MatchingService.calcConstraint(defaultInput) as MatchingList;
-        expect(actual.startAt.seconds).qtoBe(Moment('2020-01-01 09:00:00').unix());
+        expect(actual.startAt.seconds).toBe(Moment('2020-01-01 09:00:00').unix());
         expect(actual.endAt.seconds).toBe(Moment('2020-01-01 10:00:00').unix());
         expect(actual.place).toEqual([C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD]);
         expect(actual.playNumber).toEqual([2,3,4,5,6]);
