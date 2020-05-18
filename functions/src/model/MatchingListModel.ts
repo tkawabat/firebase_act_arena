@@ -11,6 +11,10 @@ export interface MatchingList {
     id: string;
     name: string;
     gender: C.Gender;
+    playNumber: Array<number>;
+    place: Array<number>;
+    startAt: FirebaseFirestore.Timestamp;
+    endAt: FirebaseFirestore.Timestamp;
     createdAt: FirebaseFirestore.Timestamp;
 }
 
@@ -24,7 +28,7 @@ class MatchingListModel extends ModelBase {
 
         return this.ref
             .where('createdAt', '>=', timeLimit)
-            .orderBy('createdAt')
+            .orderBy('createdAt', 'desc')
             .limit(limit)
             .get().then((snapshot) => {
                 return snapshot.docs.map((value) => {
@@ -33,6 +37,10 @@ class MatchingListModel extends ModelBase {
                         id: value.id,
                         name: data.name,
                         gender: data.gender,
+                        playNumber: data.playNumber,
+                        place: data.place,
+                        startAt: data.createdAt,
+                        endAt: data.createdAt,
                         createdAt: data.createdAt,
                     };
                 })
