@@ -11,6 +11,64 @@ import PushModel from '../model/PushModel';
 
 class MatchingService {
 
+    /**
+     * 制約条件が入ったMatchingListを返す。
+     * 条件を満たさない場合はnull
+     */
+    public calcConstraint = (users: MatchingList[]) :MatchingList|null => {
+        // 人数チェック
+        if (users.length < 2 || users.length >= 6) return null;
+
+        const first = users.slice(0, 1)[0];
+        const count = {
+            [C.Gender.Male]: 0,
+            [C.Gender.Female]: 0,
+            [C.Gender.Unknown]: 0, // not use
+        }
+        const limit = {
+            [C.Gender.Male]: 3,
+            [C.Gender.Female]: 3,
+        }
+        
+        for (const user of users) {
+            // 制約条件更新
+            if (first.startAt.seconds <= user.startAt.seconds) {
+                first.startAt = user.startAt;
+            }
+            if (first.endAt.seconds >= user.endAt.seconds) {
+                first.endAt = user.endAt;
+            }
+            first.playNumber.filter((v) => user.playNumber.includes(v));
+            first.place.filter((v) => user.place.includes(v));
+            count[user.gender]++;
+
+            // 条件確認
+            if (first.startAt.seconds + 60 * 60 > first.endAt.seconds) {
+                return null;
+            }
+            if (first.playNumber.length === 0) return null;
+            if (first.place.length === 0) return null;
+            if (user.gender !== C.Gender.Unknown && count[user.gender] > limit[user.gender]) continue; // 性別上限
+            
+        }
+
+        return first;
+    }
+
+    public makePatterns = (users: MatchingList[]) :MatchingList[][] => {
+        let ret:MatchingList[][] = [];
+
+        // 先頭をまず追加
+        ret.push([users.shift() as MatchingList]);
+
+        for (const user of users) {
+            const added = ret.map((v) => v.concat([user]));
+            ret = ret.concat(added);
+        }
+
+        return ret;
+    }
+
     public decideUsers = (users: MatchingList[], male:number, female: number, unkown:number) :MatchingList[] => {
         const ret = [];
 
@@ -76,7 +134,7 @@ class MatchingService {
 
     public decideProgram = async () => {
         // 演者決め
-        let users = await MatchingListModel.asyncGetWithTimelimit(10);
+        let users = await MatchingListModel.asyncGetWithTimelimit(15);
         users = this.decideUsers(users, 1, 1, 0);
         if (users.length !== 2) {
             console.log('user miss match');

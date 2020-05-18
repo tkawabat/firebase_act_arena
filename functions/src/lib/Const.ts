@@ -49,6 +49,11 @@ export const TheaterStateTime = {
 
 export const ChatMax = 30;
 
+export enum MatchingPlace {
+    ACTARENA = 1,
+    DISCORD = 2,
+}
+
 export enum PushBasicSettingKey {
     MORNING  = 1,
     DAYTIME  = 2,
