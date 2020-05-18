@@ -175,7 +175,7 @@ describe('TheaterModel.asyncTransactionState', () => {
         await TheaterModel.asyncTransitionState(id, defaultTheater);
 
         const data = (await TheaterModel.asyncGetById(id)).data() as FirebaseFirestore.DocumentData;
-        expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:03').unix());
+        expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:09').unix());
         expect(data.endAt[C.TheaterState.CHECK].seconds).toBe(Moment('2020-01-01 09:00:01').unix());
         expect(data.endAt[C.TheaterState.ACT].seconds).toBe(Moment('2020-01-01 09:00:02').unix());
     });
@@ -191,7 +191,7 @@ describe('TheaterModel.asyncTransactionState', () => {
 
         const data = (await TheaterModel.asyncGetById(id)).data() as FirebaseFirestore.DocumentData;
         expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:00').unix());
-        expect(data.endAt[C.TheaterState.CHECK].seconds).toBe(Moment('2020-01-01 09:00:03').unix());
+        expect(data.endAt[C.TheaterState.CHECK].seconds).toBe(Moment('2020-01-01 09:00:09').unix());
         expect(data.endAt[C.TheaterState.ACT].seconds).toBe(Moment('2020-01-01 09:00:02').unix());
     });
 
@@ -207,7 +207,7 @@ describe('TheaterModel.asyncTransactionState', () => {
         const data = (await TheaterModel.asyncGetById(id)).data() as FirebaseFirestore.DocumentData;
         expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:00').unix());
         expect(data.endAt[C.TheaterState.CHECK].seconds).toBe(Moment('2020-01-01 09:00:01').unix());
-        expect(data.endAt[C.TheaterState.ACT].seconds).toBe(Moment('2020-01-01 09:00:03').unix());
+        expect(data.endAt[C.TheaterState.ACT].seconds).toBe(Moment('2020-01-01 09:00:09').unix());
     });
 
 
