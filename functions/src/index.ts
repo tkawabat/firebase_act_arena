@@ -103,8 +103,6 @@ export const matchingListCreated = functions.region('asia-northeast1').runWith({
     context: functions.EventContext,
 ) => {
     console.log('UserId: ' + context.params.userId);
-    const data = snapshot.data();
-    if (!data) return;
 
     const p = [];
     p.push(PushModel.asyncSend('', 'サシ劇マッチングでエントリーしている方がいます。\n劇をしたい方は是非エントリーを！'));
