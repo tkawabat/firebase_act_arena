@@ -22,10 +22,11 @@ describe('index.arenaRoomUserDeleted', () => {
         const arenaId = 100;
         const arenaRef = admin.firestore().collection('Arena').doc(arenaId.toString());
         await arenaRef.set({
-            state: C.ArenaState.ACT
+            state: C.ArenaState.ACT,
+            characters: [],
         })
 
-        const userId = 'uesr01';
+        const userId = 'user01';
         const user = {
             state: C.ArenaUserState.ENTRY
         }
@@ -33,9 +34,9 @@ describe('index.arenaRoomUserDeleted', () => {
         const wrapped = test().wrap(Index.arenaRoomUserDeleted);
         const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/'+arenaId+'/RoomUser/'+userId);
 
-        wrapped(snapshot, {
+        await wrapped(snapshot, {
             params: {
-                arenaId: arenaId,
+                arenaId: arenaId.toString(),
                 userId: userId,
             }
         }).then(async () => {
@@ -48,35 +49,41 @@ describe('index.arenaRoomUserDeleted', () => {
         const p = [];
 
         const arenaId = 101;
+        const remainActorId = 'actor';
+        const userId = 'user01';
+
         const arenaRef = admin.firestore().collection('Arena').doc(arenaId.toString());
         p.push(arenaRef.set({
-            state: C.ArenaState.ACT
+            state: C.ArenaState.ACT,
+            characters: [
+                { user: remainActorId},
+                { user: userId},
+            ],
         }));
 
-        const remainActorId = 'actor';
         const remainActorRef = arenaRef.collection('RoomUser').doc(remainActorId);
         p.push(remainActorRef.set({
             state: C.ArenaUserState.ACTOR
         }));
 
-        const userId = 'uesr01';
+        const userRef = arenaRef.collection('RoomUser').doc(userId);
         const user = {
             state: C.ArenaUserState.ACTOR
         }
+        p.push(userRef.set(user));
 
         await Promise.all(p);
 
         const wrapped = test().wrap(Index.arenaRoomUserDeleted);
         const snapshot = test().firestore.makeDocumentSnapshot(user, 'Arena/'+arenaId+'/RoomUser/'+userId);
 
-        wrapped(snapshot, {
+        await wrapped(snapshot, {
             params: {
-                arenaId: arenaId,
+                arenaId: arenaId.toString(),
                 userId: userId,
             }
         }).then(async () => {
             const arena = (await arenaRef.get()).data() as FirebaseFirestore.DocumentData;
-            expect(arena.state).toBe(C.ArenaState.WAIT);
             expect(arena.message).toBe('演者の接続エラー\n上演を強制終了します');
             
             const remainActor = (await remainActorRef.get()).data() as FirebaseFirestore.DocumentData;
