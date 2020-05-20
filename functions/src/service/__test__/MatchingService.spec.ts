@@ -113,30 +113,48 @@ describe('MatchingService.calcConstraint', () => {
 
 describe('MatchingService.makePatterns', () => {
 
-    it('正常系', () => {
-        const input = [
-            { id: 'id01', gender: C.Gender.Male } as MatchingList,
-            { id: 'id02', gender: C.Gender.Female } as MatchingList,
-            { id: 'id03', gender: C.Gender.Female } as MatchingList,
-        ];
+    it('0件', () => {
+        const input:MatchingList[] = [];
 
         const actual = MatchingService.makePatterns(input);
-        expect(actual).toEqual([
-            [ { id: 'id01', gender: C.Gender.Male }, ],
-            [ { id: 'id01', gender: C.Gender.Male }, { id: 'id02', gender: C.Gender.Female }, ],
-            [ { id: 'id01', gender: C.Gender.Male }, { id: 'id03', gender: C.Gender.Female }, ],
-            [ { id: 'id01', gender: C.Gender.Male }, { id: 'id02', gender: C.Gender.Female }, { id: 'id03', gender: C.Gender.Female }, ],
-        ]);
+        expect(actual).toEqual([]);
     });
 
     it('1件', () => {
         const input = [
-            { id: 'id01', gender: C.Gender.Male } as MatchingList,
+            { id: 'id01' } as MatchingList,
+        ];
+
+        const actual = MatchingService.makePatterns(input);
+        expect(actual).toEqual([]);
+    });
+
+    it('2件', () => {
+        const input = [
+            { id: 'id01' } as MatchingList,
+            { id: 'id02' } as MatchingList,
         ];
 
         const actual = MatchingService.makePatterns(input);
         expect(actual).toEqual([
-            [ { id: 'id01', gender: C.Gender.Male }, ],
+            [ { id: 'id01' }, ],
+            [ { id: 'id01' }, { id: 'id02' }, ],
+        ]);
+    });
+
+    it('3件', () => {
+        const input = [
+            { id: 'id01' } as MatchingList,
+            { id: 'id02' } as MatchingList,
+            { id: 'id03' } as MatchingList,
+        ];
+
+        const actual = MatchingService.makePatterns(input);
+        expect(actual).toEqual([
+            [ { id: 'id01' }, ],
+            [ { id: 'id01' }, { id: 'id02' }, ],
+            [ { id: 'id01' }, { id: 'id03' }, ],
+            [ { id: 'id01' }, { id: 'id02' }, { id: 'id03' }, ],
         ]);
     });
 });

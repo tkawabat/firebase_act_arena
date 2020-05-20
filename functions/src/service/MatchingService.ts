@@ -59,10 +59,15 @@ class MatchingService {
     public makePatterns = (users: MatchingList[]) :MatchingList[][] => {
         let ret:MatchingList[][] = [];
 
-        // 先頭をまず追加
-        ret.push([users.shift() as MatchingList]);
+        if (users.length < 2) {
+            return ret;
+        }
 
-        for (const user of users) {
+        // 先頭をまず追加
+        const copied = users.slice();
+        ret.push([copied.shift() as MatchingList]);
+
+        for (const user of copied) {
             const added = ret.map((v) => v.concat([user]));
             ret = ret.concat(added);
         }
@@ -135,18 +140,22 @@ class MatchingService {
 
     public decideProgram = async () => {
         // 演者決め
-        let users = await MatchingListModel.asyncGetWithTimelimit(15);
-        users = this.decideUsers(users, 1, 1, 0);
-        if (users.length !== 2) {
+        const users = await MatchingListModel.asyncGetWithTimelimit(10);
+
+        const patterns = this.makePatterns(users)
+            .filter(this.calcConstraint)
+            .sort((a, b) => b.length - a.length) // desc length
+        ;
+
+        if (patterns.length < 1) {
             console.log('user miss match');
             return;
         }
-        console.log('users: ' + users.map((user) => user.name));
 
         // 台本決め
         let male = 0;
         let female = 0;
-        for (const u of users) {
+        for (const u of patterns[0]) {
             if (u.gender === C.Gender.Male) male++;
             else if (u.gender === C.Gender.Female) female++;
         }
@@ -157,13 +166,14 @@ class MatchingService {
         }
 
         // 役決め
-        const characters = this.decideCast(users, scenario);
+        const characters = this.decideCast(patterns[0], scenario);
         console.log(scenario);
 
         // update data
         const p = [];
         const theaterId = TheaterModel.createId();
-        p.push(TheaterModel.asyncCreate(theaterId, scenario, characters));
+        const constraint = this.calcConstraint(patterns[0]) as unknown as MatchingList;
+        p.push(TheaterModel.asyncCreate(theaterId, scenario, characters, constraint));
         users.forEach((user) => {
             p.push(UserModel.asyncUpdateTheater(user.id, theaterId));
             p.push(MatchingListModel.asyncDeleteById(user.id));
