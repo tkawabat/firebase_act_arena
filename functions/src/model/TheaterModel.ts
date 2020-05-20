@@ -7,6 +7,7 @@ import * as C from '../lib/Const';
 
 import ModelBase from './ModelBase';
 import { Scenario } from '../model/ScenarioModel';
+import { MatchingList } from './MatchingListModel';
 
 
 export interface TheaterCharacter {
@@ -16,6 +17,7 @@ export interface TheaterCharacter {
     userName: string
 }
 export interface Theater extends DocumentData {
+    place: C.MatchingPlace
     title: string
     author: string
     scenarioUrl: string
@@ -78,16 +80,18 @@ class TheaterModel extends ModelBase {
         return this.ref.doc(id).update({endAt: endAt});
     }
 
-    public asyncCreate = async (id:string, scenario:Scenario, characters:TheaterCharacter[]) => {
+    public asyncCreate = async (id:string, scenario:Scenario, characters:TheaterCharacter[], constraint:MatchingList) => {
         const endAt = [];
-        let t = Moment().add(C.TheaterStateTime[C.TheaterState.READ], 'seconds');
+        let t =  Moment(constraint.startAt.toDate()); // 開始時間
         endAt[C.TheaterState.READ] = admin.firestore.Timestamp.fromDate(t.toDate());
         t = Moment(t).add(C.TheaterStateTime[C.TheaterState.CHECK], 'seconds')
         endAt[C.TheaterState.CHECK] = admin.firestore.Timestamp.fromDate(t.toDate());
+        // TODO 1時間固定になっている
         t = Moment(t).add(C.TheaterStateTime[C.TheaterState.ACT], 'seconds')
         endAt[C.TheaterState.ACT] = admin.firestore.Timestamp.fromDate(t.toDate());
 
         const theater = {
+            place: constraint.place[0],
             title: scenario.title,
             author: scenario.author,
             scenarioUrl: scenario.scenarioUrl,

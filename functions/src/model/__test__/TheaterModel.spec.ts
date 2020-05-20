@@ -9,6 +9,7 @@ import * as C from '../../lib/Const';
 
 import TheaterModel, { TheaterCharacter, Theater } from '../TheaterModel';
 import { Scenario, ScenarioCharacter } from '../ScenarioModel';
+import { MatchingList } from '../MatchingListModel';
 
 
 const defaultTheater = {
@@ -252,15 +253,19 @@ describe('TheaterModel.asyncCreate', () => {
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         } as Scenario;
+        const constraint = {
+            startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 21:00:00').toDate()),
+            place: [C.MatchingPlace.DISCORD],
+        } as MatchingList;
         const characters = new Array<TheaterCharacter>();
         characters.push({name: 'name01', gender: C.Gender.Male, user: 'hoge', userName: 'hoge'});
         characters.push({name: 'name02', gender: C.Gender.Female, user: 'hoge', userName: 'hoge'});
         
-        await TheaterModel.asyncCreate(id, scenario, characters);
+        await TheaterModel.asyncCreate(id, scenario, characters, constraint);
 
-        const readEnd = Moment('2020-01-01 09:10:03').unix();
-        const checkEnd = Moment('2020-01-01 09:15:03').unix();
-        const actEnd = Moment('2020-01-01 10:15:04').unix();
+        const readEnd = Moment('2020-01-01 21:00:00').unix();
+        const checkEnd = Moment('2020-01-01 21:05:00').unix();
+        const actEnd = Moment('2020-01-01 22:05:01').unix();
 
         const data = (await TheaterModel.asyncGetById(id)).data() as FirebaseFirestore.DocumentData;
         expect(data.title).toBe('title01');
