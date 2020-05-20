@@ -17,6 +17,7 @@ describe('MatchingService.calcConstraint', () => {
         id: 'id01',
         gender: C.Gender.Male,
         playNumber: [2,3,4,5,6],
+        minutes: [C.MatchingMinutes.HALF,C.MatchingMinutes.ONE],
         place: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
         startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         endAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 10:00:00').toDate()),
@@ -74,6 +75,14 @@ describe('MatchingService.calcConstraint', () => {
     it('null endAt', () => {
         const input = defaultInput.slice();
         input[2].endAt = admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:59:59').toDate());
+        const actual = MatchingService.calcConstraint(input) as MatchingList;
+        expect(actual).toBe(null);
+    });
+
+    it('null minutes', () => {
+        const input = defaultInput.slice();
+        input[3].minutes = [C.MatchingMinutes.HALF];
+        input[4].minutes = [C.MatchingMinutes.ONE];
         const actual = MatchingService.calcConstraint(input) as MatchingList;
         expect(actual).toBe(null);
     });

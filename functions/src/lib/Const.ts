@@ -49,6 +49,13 @@ export const TheaterStateTime = {
 
 export const ChatMax = 30;
 
+export enum MatchingMinutes {
+    HALF = 1,
+    ONE = 2,
+    ONEHALF = 3,
+    TWO = 4,
+}
+
 export enum MatchingPlace {
     ACTARENA = 1,
     DISCORD = 2,
