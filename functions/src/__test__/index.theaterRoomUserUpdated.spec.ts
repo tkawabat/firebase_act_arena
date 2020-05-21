@@ -44,14 +44,14 @@ describe('index.theaterRoomUserUpdated', () => {
         const snapshot = test().firestore.makeDocumentSnapshot(defaultTheater, 'theater/'+theaterId+'/RoomUser/hoge');
         const change = test().makeChange(snapshot, snapshot);
 
-        wrapped(change, {
+        await wrapped(change, {
             params: {
                 theaterId: theaterId,
                 userId: 'hoge',
             }
         }).then(async () => {
             const data = (await theaterRef.get()).data() as FirebaseFirestore.DocumentData;
-            expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:03').unix());
+            expect(data.endAt[C.TheaterState.READ].seconds).toBe(Moment('2020-01-01 09:00:09').unix());
             expect(data.endAt[C.TheaterState.CHECK].seconds).toBe(Moment('2020-01-01 09:00:01').unix());
             expect(data.endAt[C.TheaterState.ACT].seconds).toBe(Moment('2020-01-01 09:00:02').unix());
         });
@@ -60,7 +60,7 @@ describe('index.theaterRoomUserUpdated', () => {
     it('1人だけnext 更新されない', async () => {
         global.Date.now = jest.fn(() => new Date('2020-01-01 09:00:03').getTime());
         TheaterModel.calcState = jest.fn(() => C.TheaterState.READ);
-        TheaterModel.asyncCheckAllActorIsNext = jest.fn().mockResolvedValue(true);
+        TheaterModel.asyncCheckAllActorIsNext = jest.fn().mockResolvedValue(false);
 
         const p = [];
         
@@ -74,7 +74,7 @@ describe('index.theaterRoomUserUpdated', () => {
         const wrapped = test().wrap(Index.theaterRoomUserUpdated);
         const snapshot = test().firestore.makeDocumentSnapshot(defaultTheater, 'theater/'+theaterId+'/RoomUser/hoge');
 
-        wrapped(snapshot, {
+        await wrapped(snapshot, {
             params: {
                 theaterId: theaterId,
                 userId: 'hoge',
