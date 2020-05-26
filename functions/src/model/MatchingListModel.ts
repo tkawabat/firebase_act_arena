@@ -12,7 +12,7 @@ export interface MatchingList {
     name: string;
     gender: C.Gender;
     playNumber: Array<number>;
-    minutes: Array<C.MatchingMinutes>;
+    minutes: Array<C.MatchingHour>;
     place: Array<C.MatchingPlace>;
     startAt: FirebaseFirestore.Timestamp;
     endAt: FirebaseFirestore.Timestamp;
