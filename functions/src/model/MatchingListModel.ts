@@ -12,7 +12,7 @@ export interface MatchingList {
     name: string;
     gender: C.Gender;
     playNumber: Array<number>;
-    minutes: Array<C.MatchingHour>;
+    playTime: Array<C.MatchingPlayTime>;
     place: Array<C.MatchingPlace>;
     startAt: FirebaseFirestore.Timestamp;
     endAt: FirebaseFirestore.Timestamp;
@@ -39,7 +39,7 @@ class MatchingListModel extends ModelBase {
                         name: data.name,
                         gender: data.gender,
                         playNumber: data.playNumber,
-                        minutes: data.minutes,
+                        playTime: data.minutes,
                         place: data.place,
                         startAt: data.createdAt,
                         endAt: data.createdAt,

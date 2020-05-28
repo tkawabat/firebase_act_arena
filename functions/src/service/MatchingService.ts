@@ -38,7 +38,7 @@ class MatchingService {
             if (first.endAt.seconds >= user.endAt.seconds) {
                 first.endAt = user.endAt;
             }
-            first.minutes.filter((v) => user.minutes.includes(v));
+            first.playTime.filter((v) => user.playTime.includes(v));
             first.playNumber.filter((v) => user.playNumber.includes(v));
             first.place.filter((v) => user.place.includes(v));
             count[user.gender]++;

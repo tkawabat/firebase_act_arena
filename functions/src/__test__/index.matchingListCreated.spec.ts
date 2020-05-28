@@ -20,7 +20,7 @@ describe('index.matchingListCreated', () => {
         name: 'name01',
         gender: C.Gender.Male,
         playNumber: [2,3,4,5,6],
-        minutes: [C.MatchingHour.HALF,C.MatchingHour.ONE],
+        playTime: [C.MatchingPlayTime.HALF,C.MatchingPlayTime.ONE],
         place: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
         startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         endAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 10:00:00').toDate()),
