@@ -255,7 +255,7 @@ describe('TheaterModel.asyncCreate', () => {
         } as Scenario;
         const constraint = {
             startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 21:00:00').toDate()),
-            place: [C.MatchingPlace.DISCORD],
+            places: [C.MatchingPlace.DISCORD],
         } as MatchingList;
         const characters = new Array<TheaterCharacter>();
         characters.push({name: 'name01', gender: C.Gender.Male, user: 'hoge', userName: 'hoge'});

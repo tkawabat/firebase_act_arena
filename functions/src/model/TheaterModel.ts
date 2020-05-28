@@ -91,7 +91,7 @@ class TheaterModel extends ModelBase {
         endAt[C.TheaterState.ACT] = admin.firestore.Timestamp.fromDate(t.toDate());
 
         const theater = {
-            place: constraint.place[0],
+            place: constraint.places[0],
             title: scenario.title,
             author: scenario.author,
             scenarioUrl: scenario.scenarioUrl,

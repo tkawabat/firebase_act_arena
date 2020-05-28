@@ -38,17 +38,17 @@ class MatchingService {
             if (first.endAt.seconds >= user.endAt.seconds) {
                 first.endAt = user.endAt;
             }
-            first.playTime.filter((v) => user.playTime.includes(v));
-            first.playNumber.filter((v) => user.playNumber.includes(v));
-            first.place.filter((v) => user.place.includes(v));
+            first.playTimes.filter((v) => user.playTimes.includes(v));
+            first.playNumbers.filter((v) => user.playNumbers.includes(v));
+            first.places.filter((v) => user.places.includes(v));
             count[user.gender]++;
 
             // 条件確認
             if (first.startAt.seconds + 60 * 60 > first.endAt.seconds) {
                 return null;
             }
-            if (first.playNumber.length === 0) return null;
-            if (first.place.length === 0) return null;
+            if (first.playNumbers.length === 0) return null;
+            if (first.places.length === 0) return null;
             if (user.gender !== C.Gender.Unknown && count[user.gender] > limit[user.gender]) continue; // 性別上限
             
         }

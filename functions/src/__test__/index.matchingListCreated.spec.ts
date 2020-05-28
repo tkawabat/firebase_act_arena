@@ -19,9 +19,9 @@ describe('index.matchingListCreated', () => {
         id: 'id01',
         name: 'name01',
         gender: C.Gender.Male,
-        playNumber: [2,3,4,5,6],
-        playTime: [C.MatchingPlayTime.HALF,C.MatchingPlayTime.ONE],
-        place: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
+        playNumbers: [2,3,4,5,6],
+        playTimes: [C.MatchingPlayTime.HALF,C.MatchingPlayTime.ONE],
+        places: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
         startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         endAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 10:00:00').toDate()),
     } as MatchingList;

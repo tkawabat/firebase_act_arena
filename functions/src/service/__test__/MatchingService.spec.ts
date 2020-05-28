@@ -16,9 +16,9 @@ describe('MatchingService.calcConstraint', () => {
     const defaultUser = {
         id: 'id01',
         gender: C.Gender.Male,
-        playNumber: [2,3,4,5,6],
-        playTime: [C.MatchingPlayTime.HALF,C.MatchingPlayTime.ONE],
-        place: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
+        playNumbers: [2,3,4,5,6],
+        playTimes: [C.MatchingPlayTime.HALF,C.MatchingPlayTime.ONE],
+        places: [C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD],
         startAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 09:00:00').toDate()),
         endAt: admin.firestore.Timestamp.fromDate(Moment('2020-01-01 10:00:00').toDate()),
     } as MatchingList;
@@ -40,8 +40,8 @@ describe('MatchingService.calcConstraint', () => {
         const actual = MatchingService.calcConstraint(defaultInput) as MatchingList;
         expect(actual.startAt.seconds).toBe(Moment('2020-01-01 09:00:00').unix());
         expect(actual.endAt.seconds).toBe(Moment('2020-01-01 10:00:00').unix());
-        expect(actual.place).toEqual([C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD]);
-        expect(actual.playNumber).toEqual([2,3,4,5,6]);
+        expect(actual.places).toEqual([C.MatchingPlace.ACTARENA, C.MatchingPlace.DISCORD]);
+        expect(actual.playNumbers).toEqual([2,3,4,5,6]);
     });
 
     it('null 0人', () => {
@@ -81,24 +81,24 @@ describe('MatchingService.calcConstraint', () => {
 
     it('null minutes', () => {
         const input = defaultInput.slice();
-        input[3].playTime = [C.MatchingPlayTime.HALF];
-        input[4].playTime = [C.MatchingPlayTime.ONE];
+        input[3].playTimes = [C.MatchingPlayTime.HALF];
+        input[4].playTimes = [C.MatchingPlayTime.ONE];
         const actual = MatchingService.calcConstraint(input) as MatchingList;
         expect(actual).toBe(null);
     });
 
     it('null playNumber', () => {
         const input = defaultInput.slice();
-        input[3].playNumber = [2,3];
-        input[4].playNumber = [4,5];
+        input[3].playNumbers = [2,3];
+        input[4].playNumbers = [4,5];
         const actual = MatchingService.calcConstraint(input) as MatchingList;
         expect(actual).toBe(null);
     });
 
     it('null endAt', () => {
         const input = defaultInput.slice();
-        input[2].place = [C.MatchingPlace.ACTARENA];
-        input[3].place = [C.MatchingPlace.DISCORD];
+        input[2].places = [C.MatchingPlace.ACTARENA];
+        input[3].places = [C.MatchingPlace.DISCORD];
         const actual = MatchingService.calcConstraint(input) as MatchingList;
         expect(actual).toBe(null);
     });
